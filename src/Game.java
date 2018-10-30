@@ -22,7 +22,7 @@ private AudioClip dangerSound;  //audio of danger sound
 private AudioClip gameOverSound;//audio of game over screen
 private Player player;  //player object
 private Shooter shooter;    //shooter object
-private int gameState = 1;  //0-game menu, 1-game, 2-game over screen
+private int gameState = 0;  //0-game menu, 1-game, 2-game over screen
 private ArrayList<Background> background;
 private ArrayList<BgSprite> bgSprites;  //list with all background sprites visible on screen
 private ArrayList<Obstacle> obstacles;  //list with all obstacles visible on screen
@@ -35,6 +35,7 @@ private Timer obstacleTimer;    //timer for obstacles
 private Timer shooterTimer;     //timer for shooter
 private Timer levelTimer;    //timer for time left to beat the level
 
+private Menu menu; // menu object
 
 public Game(){
     initGame();
@@ -48,17 +49,31 @@ private void initGame(){
     setDoubleBuffered(true);
     initSounds();
 
-    if(gameState==1){   //more will be added here when we have our menu
+    //creates timer with delay of our DELAY variable,
+    // It's the main Timer which should be created separately at the top of the program
+    // (Other timers regarding sprites are created at initTime() method
+    mainTimer = new Timer(DELAY, this);
+    mainTimer.start();  //starts mainTimer
+
+
+
+    if(gameState < 2){   //Game state 0 (menu) or 1 (actual game)
+
+        menu = new Menu(); // menu object from Menu class is created
+
         levelTime *= levelNum;  //time needed to complete level, levelNum will be decided in the menu
         player = new Player();  //creates new Player object
+
         shooter = new Shooter(0, player.getY());    //creates new Shooter object on the edge of the screen and the same floor level as player
         background = new ArrayList<>();
         background.add(new Background(0, 0, new Random().nextInt(5)+1));
+
+        shooter = new Shooter(0, player.getY());    //creates new Shooter object on the edge of the
+        // screen and the same floor level as player
+
         initLifes();
-        initTimers();
-
-
     }
+
 }
 
 
@@ -66,6 +81,9 @@ private void initGame(){
 public void paintComponent(Graphics g){     //draws everything on screen
     super.paintComponent(g);
 
+    if (gameState == 0) {
+        drawMenu(g);
+    }
     if(gameState==1){
 
         drawGame(g);
@@ -76,6 +94,14 @@ public void paintComponent(Graphics g){     //draws everything on screen
     }
 
     Toolkit.getDefaultToolkit().sync();
+}
+
+
+private void drawMenu(Graphics g) { // draws menu scene
+
+    menu.render(g);
+
+
 }
 
 private void drawGame(Graphics g){
@@ -147,14 +173,23 @@ private void drawGameOver(Graphics g){  //draws game over screen
 @Override
 public void actionPerformed(ActionEvent e){     //actions performed by mainTimer
 
+
+    if(gameState == 0){
+        menu.tick(); // Update the menu
+
+    }
+
+    if (gameState == 1) {
+        updateSprites();
+
+        checkCollisions();
+    }
+
     if(gameState==2){
         stopTimers();
         gameOverSound.play();
     }
 
-    updateSprites();
-
-    checkCollisions();
 
     repaint();
 }
@@ -290,10 +325,7 @@ private void initSounds(){  //method to load all game sounds
     gameOverSound = Applet.newAudioClip(url);
 }
 
-private void initTimers(){   //starts all timers
-
-    mainTimer = new Timer(DELAY, this);  //creates timer with delay of our DELAY variable
-    mainTimer.start();  //starts mainTimer
+private void initTimers(){   //starts all timers except main timer which is started at the first steps
 
    /* bgSprites = new ArrayList<>();
     bgSpriteTimer = new Timer(3000, e -> {      //creates timer that will add new background sprite every 3 seconds
@@ -302,7 +334,8 @@ private void initTimers(){   //starts all timers
     bgSpriteTimer.start(); */
 
     obstacles = new ArrayList<>();
-    obstacleTimer = new Timer(1500, e -> {      //creates timer that adds new obstacles every 1.5 second, will be changed in the future based on difficulty level
+    obstacleTimer = new Timer(1500, e -> {      //creates timer that adds new obstacles every 1.5 second, will be
+        // changed in the future based on difficulty level
         obstacles.add(new Obstacle(windowWidth, windowHeight, new Random().nextInt(3)+1));
     });
     obstacleTimer.start();
@@ -358,18 +391,49 @@ public static int getWindowHeight(){
         @Override
         public void keyReleased(KeyEvent e){
 
-            player.keyRelesed(e);
+            if (gameState == 0) {
+                menu.keyRelesed(e);
+            }
+
+            if (gameState == 1) {
+                player.keyRelesed(e);
+            }
+
+
         }
 
         @Override
         public void keyPressed(KeyEvent e){
-            player.keyPressed(e);
+
+            if (gameState == 1) {
+                player.keyPressed(e);
+            }
+
+            if(gameState == 0) {
+                menu.keyPressed(e);
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+
+                    if (menu.currentSelection == 0) { // CLICK ON PLAY
+                        gameState = 1;
+                        initTimers(); //////////////// ATTENTION /////////////////
+                        ////////////////////////////// After clicking on play all the other timers need to be start
+                    }
+
+                    if (menu.currentSelection == 3) { // CLICK ON EXIT
+                        System.exit(1);
+                    }
+                }
+
+
+            }
+
             if(gameState == 2){
                 if(e.getKeyCode() == KeyEvent.VK_SPACE){
                     gameOverSound.stop();
                     gameState=1;
                     levelTime = 60000;
-                    initGame();
+                    initGame(); // Besides starting the game again we need to start timers for sprites so we will call initTimers();
+                    initTimers();
                 }
             }
         }
