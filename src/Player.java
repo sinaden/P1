@@ -8,8 +8,8 @@ import java.util.ArrayList;
 
 public class Player extends Sprite {
 
-    private final int jumpSpeed = -8;
-    private final int fallingSpeed = 8;
+    private final int jumpSpeed = -15;
+    private final int fallingSpeed = 10;
     private final int floorLevel = 60;
     private int standingOrDucking = 0;  //variable for Array list to determine which sprite to use
     private int animationFrame = 0;     //^
@@ -100,10 +100,13 @@ public class Player extends Sprite {
         else if(y < gameHeight-floorLevel-standingHeight){   //else player will start falling down
             y += fallingSpeed;
         }
+        if(standingOrDucking==0 && y>gameHeight-floorLevel-standingHeight){
+            y = gameHeight-floorLevel-standingHeight;
+        }
         if(y == gameHeight-floorLevel-standingHeight){       //if player touches the ground he can jump again
             jumpAvailable =true;
         }
-        if(y <= gameHeight-floorLevel-(standingHeight*2.5)) {  //if player reaches highest point of jump
+        if(y <= gameHeight-floorLevel-(standingHeight*2.4)) {  //if player reaches highest point of jump
             jumpAvailable = false;
         }
     }
@@ -123,7 +126,7 @@ public class Player extends Sprite {
         }
 
         if (key == KeyEvent.VK_DOWN){ //down key pressed
-            if(jumpAvailable && y == gameHeight-floorLevel-standingHeight){
+            if(jumpAvailable && y == gameHeight-floorLevel-standingHeight && standingOrDucking==0){
                 standingOrDucking = 1;
                 setImage();
                 y += (standingHeight-duckingHeight);
@@ -137,9 +140,10 @@ public class Player extends Sprite {
 
         int key = e.getKeyCode();
 
-        if (key == KeyEvent.VK_UP){ //up key released
+        if (key == KeyEvent.VK_UP && standingOrDucking==0){ //up key released
 
             jumpKey = false;
+            jumpAvailable = false;
         }
 
         if (key == KeyEvent.VK_DOWN){ //down key released

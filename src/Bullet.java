@@ -1,6 +1,6 @@
 public class Bullet extends Sprite {
 
-    private final int BULLET_SPEED = 10; //speed of the bullet in pixels per frame
+    private final int BULLET_SPEED = 20; //speed of the bullet in pixels per frame
 
     public Bullet(int x, int y){
 

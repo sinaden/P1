@@ -14,7 +14,7 @@ public class Game extends JPanel implements ActionListener {
 
 private static int windowWidth = 1024;  //window's width
 private static int windowHeight = 720;  //window's height
-private final int DELAY = 10;   //delay between each frame
+private final int DELAY = 16;   //delay between each frame
 private int levelTime = 60000;  //default time for level, will be multiplied by levelNum
 private int levelNum = 1;   //number of chosen level
 private AudioClip damageSound;   //audio of damage sound
@@ -23,6 +23,7 @@ private AudioClip gameOverSound;//audio of game over screen
 private Player player;  //player object
 private Shooter shooter;    //shooter object
 private int gameState = 1;  //0-game menu, 1-game, 2-game over screen
+private ArrayList<Background> background;
 private ArrayList<BgSprite> bgSprites;  //list with all background sprites visible on screen
 private ArrayList<Obstacle> obstacles;  //list with all obstacles visible on screen
 private ArrayList<Heart> lifes;   //list with all hearts visible on screen
@@ -51,6 +52,8 @@ private void initGame(){
         levelTime *= levelNum;  //time needed to complete level, levelNum will be decided in the menu
         player = new Player();  //creates new Player object
         shooter = new Shooter(0, player.getY());    //creates new Shooter object on the edge of the screen and the same floor level as player
+        background = new ArrayList<>();
+        background.add(new Background(0, 0, new Random().nextInt(5)+1));
         initLifes();
         initTimers();
 
@@ -78,14 +81,15 @@ public void paintComponent(Graphics g){     //draws everything on screen
 private void drawGame(Graphics g){
     Graphics2D g2d = (Graphics2D) g;
 
-    //draw Floor, will probably be deleted in the future
-    g.setColor(Color.green);
-    g.fillRect(-1, windowHeight-100, windowWidth, 100);
+    //draw Background
+    for(Background background : background){
+        g2d.drawImage(background.getImage(), background.getX(), background.getY(), this);
+    }
 
     //draw BgSprites
-    for(BgSprite bgSprite : bgSprites){
+   /* for(BgSprite bgSprite : bgSprites){
         g2d.drawImage(bgSprite.getImage(), bgSprite.getX(), bgSprite.getY(), this);
-    }
+    }*/
 
     //draw player
     g2d.drawImage(player.getImage(),player.getX(), player.getY(), this);
@@ -162,13 +166,30 @@ private void updateSprites(){
     player.move();
 
     //updates position of BgSprites and deletes ones that are out of screen
-    for(int i = 0; i < bgSprites.size(); i++){
+/*    for(int i = 0; i < bgSprites.size(); i++){
+
 
         if(bgSprites.get(i).isVisible()){
             bgSprites.get(i).move();
         }
         else{
             bgSprites.remove(i);
+        }
+
+    }
+*/
+    //updates position of background
+    for(int i =0; i<background.size(); i++){
+        if(background.get(i).getX()==0){
+            background.add(new Background(windowWidth-background.get(i).getSpeed(), 0, new Random().nextInt(5)+1));
+        }
+
+        if(background.get(i).isVisible()){
+            background.get(i).move();
+        }
+        else{
+            background.remove(i);
+
         }
     }
 
@@ -274,11 +295,11 @@ private void initTimers(){   //starts all timers
     mainTimer = new Timer(DELAY, this);  //creates timer with delay of our DELAY variable
     mainTimer.start();  //starts mainTimer
 
-    bgSprites = new ArrayList<>();
+   /* bgSprites = new ArrayList<>();
     bgSpriteTimer = new Timer(3000, e -> {      //creates timer that will add new background sprite every 3 seconds
         bgSprites.add(new BgSprite(windowWidth, new Random().nextInt(windowHeight/3)+1));   //adds new BgSprite object to bgSprites list at random y position
     });
-    bgSpriteTimer.start();
+    bgSpriteTimer.start(); */
 
     obstacles = new ArrayList<>();
     obstacleTimer = new Timer(1500, e -> {      //creates timer that adds new obstacles every 1.5 second, will be changed in the future based on difficulty level
@@ -315,7 +336,7 @@ private void initTimers(){   //starts all timers
 private void stopTimers(){  //method that stops all timers
 
     mainTimer.stop();
-    bgSpriteTimer.stop();
+   // bgSpriteTimer.stop();
     obstacleTimer.stop();
     shooterTimer.stop();
     levelTimer.stop();

@@ -1,6 +1,6 @@
 public class Obstacle extends Sprite {
 
-    private final int OBSTACLE_SPEED = 7;
+    private final int OBSTACLE_SPEED = 15;
 
     public Obstacle(int x, int y, int index){
 
