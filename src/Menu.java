@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.InputStream;
 
 /*
 
@@ -30,6 +31,10 @@ public class Menu{
 
         // Options array would be made here, remember that TTF file for the "DK Cool Crayon"
         // Font should be added to JVM fonts folder
+
+//        Font font = null;
+//        InputStream is = DemoFonts.class.getResourceAsStream("/DK Cool Crayon.ttf");
+//        font = Font.createFont(Font.TRUETYPE_FONT, is);
 
         options[0] = new Button("PLAY", 300 + 0 * 76,
                 new Font("DK Cool Crayon", Font.BOLD, 70), // The text format when it's not selected
