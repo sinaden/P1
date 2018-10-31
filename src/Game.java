@@ -20,6 +20,7 @@ private int levelNum = 1;   //number of chosen level
 private AudioClip damageSound;   //audio of damage sound
 private AudioClip dangerSound;  //audio of danger sound
 private AudioClip gameOverSound;//audio of game over screen
+private AudioClip backgroundMusic; // music playing in the background
 private Player player;  //player object
 private Shooter shooter;    //shooter object
 private int gameState = 0;  //0-game menu, 1-game, 2-game over screen
@@ -48,6 +49,7 @@ private void initGame(){
     setBackground(Color.cyan);  //when we have our background ready it will be deleted
     setDoubleBuffered(true);
     initSounds();
+    initBackgroundMusic();
 
     //creates timer with delay of our DELAY variable,
     // It's the main Timer which should be created separately at the top of the program
@@ -60,6 +62,7 @@ private void initGame(){
     if(gameState < 2){   //Game state 0 (menu) or 1 (actual game)
 
         menu = new Menu(); // menu object from Menu class is created
+        backgroundMusic.play();
 
         levelTime *= levelNum;  //time needed to complete level, levelNum will be decided in the menu
         player = new Player();  //creates new Player object
@@ -75,6 +78,7 @@ private void initGame(){
     }
 
 }
+
 
 
 @Override
@@ -187,6 +191,7 @@ public void actionPerformed(ActionEvent e){     //actions performed by mainTimer
 
     if(gameState==2){
         stopTimers();
+        backgroundMusic.stop();
         gameOverSound.play();
     }
 
@@ -311,6 +316,11 @@ private void initLifes(){   //creates 3 heart objects and adds them to lifes lis
     for(int i = 0; i<3;i++){
         lifes.add(new Heart(windowWidth-(55+(i*55)), 0));
     }
+}
+
+private void initBackgroundMusic() { // method to load background music
+    URL url = this.getClass().getResource("/backgroundMusic.wav"); // url to background Music file
+    backgroundMusic = Applet.newAudioClip(url); // background music object
 }
 
 private void initSounds(){  //method to load all game sounds
