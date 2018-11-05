@@ -1,4 +1,3 @@
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -26,39 +25,56 @@ public class Menu{
     private boolean stopHere = false; // If it's true, the menu could not be updated
     // (used for not changing the currentselected when user's finger is still on the keyboard.)
 
+    public Font loadFont(){
+        try {
+            String fName = "/DK Cool Crayon.ttf";
+            InputStream is = this.getClass().getResourceAsStream(fName);
+            Font font = Font.createFont(Font.TRUETYPE_FONT, is);
+            return font;
+        }
+        catch (Exception e){
+            return null;
+        }
+    }
+
     // Constructor
     public Menu() {
         options = new Button[4];
 
         // Options array would be made here, remember that TTF file for the "DK Cool Crayon"
         // Font should be added to JVM fonts folder
+        Font fontSmall= loadFont();
+        fontSmall = fontSmall.deriveFont(Font.BOLD, 70);
+        Font fontBig = loadFont();
+        fontBig = fontBig.deriveFont(Font.BOLD, 80);
 
-//        Font font = null;
-//        InputStream is = DemoFonts.class.getResourceAsStream("/DK Cool Crayon.ttf");
-//        font = Font.createFont(Font.TRUETYPE_FONT, is);
+
+
 
         options[0] = new Button("PLAY", 300 + 0 * 76,
-                new Font("DK Cool Crayon", Font.BOLD, 70), // The text format when it's not selected
-                new Font("DK Cool Crayon", Font.BOLD, 80),// The text format when it's selected,
+                //new Font("DK Cool Crayon", Font.BOLD, 70), // The text format when it's not selected
+                fontSmall,
+                fontBig,// The text format when it's selected,
+
                 // the only change is the size
                 Color.WHITE, Color.WHITE); // The colors don't change but we can change them
-                                            // if it's was to be.
+        // if it's was to be.
 
         options[1] = new Button("OPTIONS", 300 + 1 * 76,
-                new Font("DK Cool Crayon", Font.BOLD, 70),
-                new Font("DK Cool Crayon", Font.BOLD, 80), Color.WHITE, Color.WHITE);
+                fontSmall,
+                fontBig, Color.WHITE, Color.WHITE);
 
         options[2] = new Button("SHOP", 300 + 2 * 76,
-                new Font("DK Cool Crayon", Font.BOLD, 70),
-                new Font("DK Cool Crayon", Font.BOLD, 80), Color.WHITE, Color.WHITE);
+                fontSmall,
+                fontBig, Color.WHITE, Color.WHITE);
 
         options[3] = new Button("EXIT", 300 + 3 * 76,
-                new Font("DK Cool Crayon", Font.BOLD, 70),
-                new Font("DK Cool Crayon", Font.BOLD, 80), Color.WHITE, Color.WHITE);
+                fontSmall,
+                fontBig, Color.WHITE, Color.WHITE);
     }
 
     public void tick() { // Update the menu (pretty much like the Player's move method)
-                        // , the method is called at the ActionPerformed Method at Game.java
+        // , the method is called at the ActionPerformed Method at Game.java
 
         if (!stopHere) {
             if (xd == -1) { // means it goes to an upper button
@@ -124,11 +140,12 @@ public class Menu{
         g2d.drawImage(menuOne, 0, 0, null);
 
 
-
+        Font fontBig = loadFont();
+        fontBig = fontBig.deriveFont(Font.BOLD, 80);
 
         // drawing The title "THE QUITE KID"
-        Fonts.drawString(g, new Font("DK Cool Crayon", Font.BOLD, 80),
-                Color.WHITE, " \"THE QUITE KID\" ", 100);
+        Fonts.drawString(g, fontBig,
+                Color.WHITE, " \"THE QUIET KID\" ", 100);
 
 
         // Rendereing every Button, And implementing the "currentSelection"
@@ -143,6 +160,3 @@ public class Menu{
         }
     }
 }
-
-
-

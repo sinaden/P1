@@ -21,6 +21,7 @@ private AudioClip damageSound;   //audio of damage sound
 private AudioClip dangerSound;  //audio of danger sound
 private AudioClip gameOverSound;//audio of game over screen
 private AudioClip congratsSound; //audio of when you finish a level
+private AudioClip backgroundMusic; // music playing in the background
 private Player player;  //player object
 private Shooter shooter;    //shooter object
 private int gameState = 0;  //0-game menu, 1-game, 2-game over screen, 3-congrats screen
@@ -35,7 +36,8 @@ private Timer bgSpriteTimer;     //timer for background sprites
 private Timer obstacleTimer;    //timer for obstacles
 private Timer shooterTimer;     //timer for shooter
 private Timer levelTimer;    //timer for time left to beat the level
-
+private boolean musicOption = true;
+private static boolean soundOption = false;
 private Menu menu; // menu object
 private Congrats congrats;
 
@@ -51,6 +53,7 @@ private void initGame(){
     setBackground(Color.cyan);  //when we have our background ready it will be deleted
     setDoubleBuffered(true);
     initSounds();
+    initBackgroundMusic();
 
     //creates timer with delay of our DELAY variable,
     // It's the main Timer which should be created separately at the top of the program
@@ -63,6 +66,7 @@ private void initGame(){
     if(gameState < 2){   //Game state 0 (menu) or 1 (actual game)
 
         menu = new Menu(); // menu object from Menu class is created
+        backgroundMusic.play();
 
         congrats = new Congrats(); //congrats object created
 
@@ -204,12 +208,15 @@ public void actionPerformed(ActionEvent e){     //actions performed by mainTimer
     }
 
     if(gameState == 2) {
-            stopTimers();
-            gameOverSound.play();
+        stopTimers();
+        backgroundMusic.stop();
+        gameOverSound.play();
+
     }
     if(gameState == 3){
      //   stopTimers();
         congrats.tick();
+        backgroundMusic.stop();
         congratsSound.play();
     }
     repaint();
@@ -343,19 +350,41 @@ private void initLives(){   //creates 3 heart objects and adds them to lives lis
     }
 }
 
+private void initBackgroundMusic() { // method to load background music
+        URL url = this.getClass().getResource("/backgroundMusic.wav"); // url to background Music file
+        backgroundMusic = Applet.newAudioClip(url); // background music object
+}
+
 private void initSounds(){  //method to load all game sounds
 
-    URL url = this.getClass().getResource("/damage.wav");   //url to damage sound
-    damageSound = Applet.newAudioClip(url);     //damage sound object
+    if(soundOption) {
 
-    url=this.getClass().getResource("/danger.wav");
-    dangerSound = Applet.newAudioClip(url);
+        URL url = this.getClass().getResource("/damage.wav");   //url to damage sound
+        damageSound = Applet.newAudioClip(url);     //damage sound object
 
-    url = this.getClass().getResource("/gameover.wav");
-    gameOverSound = Applet.newAudioClip(url);
+        url = this.getClass().getResource("/danger.wav");
+        dangerSound = Applet.newAudioClip(url);
 
-    url = this.getClass().getResource("/congratsSound.wav");
-    congratsSound = Applet.newAudioClip(url);
+        url = this.getClass().getResource("/gameover.wav");
+        gameOverSound = Applet.newAudioClip(url);
+
+        url = this.getClass().getResource("/congratsSound.wav");
+        congratsSound = Applet.newAudioClip(url);
+    }
+    else{
+        URL url = this.getClass().getResource("/soundoff.wav");
+        damageSound = Applet.newAudioClip(url);     //damage sound object
+
+        dangerSound = Applet.newAudioClip(url);
+
+        gameOverSound = Applet.newAudioClip(url);
+
+        congratsSound = Applet.newAudioClip(url);
+    }
+}
+
+public static boolean getSoundOption(){
+    return soundOption;
 }
 
 private void initTimers(){   //starts all timers except main timer which is started at the first steps

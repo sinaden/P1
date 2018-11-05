@@ -10,7 +10,7 @@ everything related to Menu would happen here.
 
  */
 
-public class Congrats{
+public class Congrats extends Menu{
 
     private final Button[] Options; // options is an array of several Buttons for the main menu
     // They would be the "PLAY" "OPTIONS" "SHOP" & "EXIT" buttons.
@@ -24,23 +24,30 @@ public class Congrats{
     private boolean stopHere = false; // If it's true, the menu could not be updated
     // (used for not changing the currentselected when user's finger is still on the keyboard.)
 
+
+
     // Constructor
     public Congrats() {
         Options = new Button[2];
+
+        Font fontSmall= loadFont();
+        fontSmall = fontSmall.deriveFont(Font.BOLD, 70);
+        Font fontBig = loadFont();
+        fontBig = fontBig.deriveFont(Font.BOLD, 80);
 
         // Options array would be made here, remember that TTF file for the "DK Cool Crayon"
         // Font should be added to JVM fonts folder
 
         Options[0] = new Button("Next level", 300 + 0 * 76,
-                new Font("DK Cool Crayon", Font.BOLD, 70), // The text format when it's not selected
-                new Font("DK Cool Crayon", Font.BOLD, 80),// The text format when it's selected,
+                fontSmall, // The text format when it's not selected
+                fontBig,// The text format when it's selected,
                 // the only change is the size
                 Color.WHITE, Color.WHITE); // The colors don't change but we can change them
         // if it's was to be.
 
         Options[1] = new Button("Menu", 300 + 1 * 76,
-                new Font("DK Cool Crayon", Font.BOLD, 70),
-                new Font("DK Cool Crayon", Font.BOLD, 80), Color.WHITE, Color.WHITE);
+                fontSmall,
+                fontBig, Color.WHITE, Color.WHITE);
     }
 
     public void tick() { // Update the menu (pretty much like the Player's move method)
@@ -103,11 +110,12 @@ public class Congrats{
         menuOne = ii.getImage();  //ImageIcon method to assign image icon from ii object to image
         g2d.drawImage(menuOne, 0, 0, null);
 
-
+        Font fontBig = loadFont();
+        fontBig = fontBig.deriveFont(Font.BOLD, 80);
 
 
         // Drawing the title Good Job!
-        Fonts.drawString(g, new Font("DK Cool Crayon", Font.BOLD, 80),
+        Fonts.drawString(g, fontBig,
                 Color.WHITE, "Good Job!", 100);
 
 

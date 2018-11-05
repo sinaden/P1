@@ -18,8 +18,8 @@ public class Player extends Sprite {
     private ArrayList<Image> duckingSprites = new ArrayList<>();    //Array list with all ducking sprites
     private boolean jumpKey;    //check if jump key is pressed
     private boolean jumpAvailable;  //checks if player landed after the last jump
-    private URL jumpUrl = this.getClass().getResource("/jump.wav"); //URL address to jump sound
-    private AudioClip jumpSound = Applet.newAudioClip(jumpUrl);     //jump audio clip
+    private URL jumpUrl;
+    AudioClip jumpSound;
     private int standingHeight;
     private int duckingHeight;
     private int gameHeight = Game.getWindowHeight();
@@ -28,6 +28,14 @@ public class Player extends Sprite {
     public Player(){
 
         super(0, 0); //starting x and y position of the player
+
+        if(Game.getSoundOption()){
+            jumpUrl  = this.getClass().getResource("/jump.wav"); //URL address to jump sound
+        }
+        else{
+            jumpUrl = this.getClass().getResource("/soundoff.wav"); //URL address to jump sound
+        }
+        jumpSound = Applet.newAudioClip(jumpUrl);     //jump audio clip
 
         initPlayer();
 
