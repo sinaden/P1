@@ -20,13 +20,14 @@ private int levelNum = 1;   //number of chosen level
 private AudioClip damageSound;   //audio of damage sound
 private AudioClip dangerSound;  //audio of danger sound
 private AudioClip gameOverSound;//audio of game over screen
+private AudioClip congratsSound; //audio of when you finish a level
 private Player player;  //player object
 private Shooter shooter;    //shooter object
-private int gameState = 0;  //0-game menu, 1-game, 2-game over screen
+private int gameState = 0;  //0-game menu, 1-game, 2-game over screen, 3-congrats screen
 private ArrayList<Background> background;
 private ArrayList<BgSprite> bgSprites;  //list with all background sprites visible on screen
-private ArrayList<Obstacle> obstacles;  //list with all obstacles visible on screen
-private ArrayList<Heart> lifes;   //list with all hearts visible on screen
+private ArrayList<Obstacle> obstacles;  //list with all obstacles visfible on screen
+private ArrayList<Heart> lives;   //list with all hearts visible on screen
 private ArrayList<Bullet> bullets;  //list with all bullets visible on screen
 private ArrayList<Danger> danger;   //list with all danger sings visible on screen
 private Timer mainTimer;    //main timer for the game
@@ -36,6 +37,8 @@ private Timer shooterTimer;     //timer for shooter
 private Timer levelTimer;    //timer for time left to beat the level
 
 private Menu menu; // menu object
+private Congrats congrats;
+
 
 public Game(){
     initGame();
@@ -61,7 +64,9 @@ private void initGame(){
 
         menu = new Menu(); // menu object from Menu class is created
 
-        levelTime *= levelNum;  //time needed to complete level, levelNum will be decided in the menu
+        congrats = new Congrats(); //congrats object created
+
+        levelTime *= levelNum;  //this will make levelTime scale up incredibly fast //time needed to complete level, levelNum will be decided in the menu
         player = new Player();  //creates new Player object
 
         shooter = new Shooter(0, player.getY());    //creates new Shooter object on the edge of the screen and the same floor level as player
@@ -71,7 +76,7 @@ private void initGame(){
         shooter = new Shooter(0, player.getY());    //creates new Shooter object on the edge of the
         // screen and the same floor level as player
 
-        initLifes();
+        initLives();
     }
 
 }
@@ -81,17 +86,23 @@ private void initGame(){
 public void paintComponent(Graphics g){     //draws everything on screen
     super.paintComponent(g);
 
-    if (gameState == 0) {
+    if (gameState == 0){
+
         drawMenu(g);
     }
-    if(gameState==1){
+    if(gameState == 1){
 
         drawGame(g);
     }
-    else if(gameState==2){
+    if(gameState == 2){
 
-        drawGameOver(g);
+            drawGameOver(g);
     }
+    if(gameState == 3){
+
+        drawCongrats(g);
+    }
+
 
     Toolkit.getDefaultToolkit().sync();
 }
@@ -128,8 +139,8 @@ private void drawGame(Graphics g){
         g2d.drawImage(obstacle.getImage(), obstacle.getX(), obstacle.getY(), this);
     }
 
-    //draw lifes
-    for(Heart life : lifes){
+    //draw lives
+    for(Heart life : lives){
         g2d.drawImage(life.getImage(), life.getX(), life.getY(), this);
     }
 
@@ -170,27 +181,37 @@ private void drawGameOver(Graphics g){  //draws game over screen
     g.drawString("-Press SPACE to retry-", (windowWidth/2) - (fm.stringWidth(msg)), windowHeight / 2 + (fm.getHeight()*3));
 }
 
+private void drawCongrats(Graphics g) { // draws congrats page
+
+       congrats.render(g);
+
+
+}
+
+
 @Override
 public void actionPerformed(ActionEvent e){     //actions performed by mainTimer
 
 
     if(gameState == 0){
         menu.tick(); // Update the menu
-
     }
 
     if (gameState == 1) {
         updateSprites();
-
         checkCollisions();
+        checkTimer();
     }
 
-    if(gameState==2){
-        stopTimers();
-        gameOverSound.play();
+    if(gameState == 2) {
+            stopTimers();
+            gameOverSound.play();
     }
-
-
+    if(gameState == 3){
+     //   stopTimers();
+        congrats.tick();
+        congratsSound.play();
+    }
     repaint();
 }
 
@@ -283,6 +304,7 @@ private void checkCollisions(){
         }
     }
 
+
     //checks collision with bullet
     for (int i =0; i < bullets.size(); i++){
 
@@ -290,11 +312,11 @@ private void checkCollisions(){
 
         if(rP.intersects(rB)){  //if player touches bullet
 
-            lifes.remove(lifes.size()-1);  //removes one life
+            lives.remove(lives.size()-1);  //removes one life
             bullets.remove(i);
             damageSound.play();
 
-            if(lifes.size() == 0){  //checks if player is still alive
+            if(lives.size() == 0){  //checks if player is still alive
 
                 gameState=2;    //game over screen
                 damageSound.stop();
@@ -305,11 +327,19 @@ private void checkCollisions(){
 
 }
 
-private void initLifes(){   //creates 3 heart objects and adds them to lifes list
+private void checkTimer() {
+        if(levelTime <= 0) {
+            gameState = 3;
+            congratsSound.play();
+            stopTimers();
+        }
+}
 
-    lifes = new ArrayList<>();
+private void initLives(){   //creates 3 heart objects and adds them to lives list
+
+    lives = new ArrayList<>();
     for(int i = 0; i<3;i++){
-        lifes.add(new Heart(windowWidth-(55+(i*55)), 0));
+        lives.add(new Heart(windowWidth-(55+(i*55)), 0));
     }
 }
 
@@ -323,9 +353,16 @@ private void initSounds(){  //method to load all game sounds
 
     url = this.getClass().getResource("/gameover.wav");
     gameOverSound = Applet.newAudioClip(url);
+
+    url = this.getClass().getResource("/congratsSound.wav");
+    congratsSound = Applet.newAudioClip(url);
 }
 
 private void initTimers(){   //starts all timers except main timer which is started at the first steps
+
+    levelTime = 60000;  //default time for level, will be multiplied by levelNum
+    levelTime *= levelNum;
+
 
    /* bgSprites = new ArrayList<>();
     bgSpriteTimer = new Timer(3000, e -> {      //creates timer that will add new background sprite every 3 seconds
@@ -359,7 +396,7 @@ private void initTimers(){   //starts all timers except main timer which is star
     });
     shooterTimer.start();
 
-    levelTimer = new Timer(1000, e -> {
+    levelTimer = new Timer(200, e -> {
        levelTime-=1000;
     });
     levelTimer.start();
@@ -368,7 +405,8 @@ private void initTimers(){   //starts all timers except main timer which is star
 
 private void stopTimers(){  //method that stops all timers
 
-    mainTimer.stop();
+    if (gameState != 3)
+        mainTimer.stop();
    // bgSpriteTimer.stop();
     obstacleTimer.stop();
     shooterTimer.stop();
@@ -392,11 +430,15 @@ public static int getWindowHeight(){
         public void keyReleased(KeyEvent e){
 
             if (gameState == 0) {
-                menu.keyRelesed(e);
+                menu.keyReleased(e);
             }
 
             if (gameState == 1) {
-                player.keyRelesed(e);
+                player.keyReleased(e);
+            }
+
+            if (gameState == 3) {
+                congrats.keyReleased(e);
             }
 
 
@@ -423,18 +465,36 @@ public static int getWindowHeight(){
                         System.exit(1);
                     }
                 }
-
-
             }
 
             if(gameState == 2){
-                if(e.getKeyCode() == KeyEvent.VK_SPACE){
+                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                     gameOverSound.stop();
-                    gameState=1;
+                    gameState = 1;
                     levelTime = 60000;
                     initGame(); // Besides starting the game again we need to start timers for sprites so we will call initTimers();
                     initTimers();
                 }
+            }
+            if(gameState == 3){
+                congrats.keyPressed(e);
+
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+
+            if (congrats.currentSelection == 0) { // CLICK ON NextLevel
+                gameState = 1;
+                initTimers();
+            //    initTimersForLevelTwo();
+
+                //////////////// ATTENTION /////////////////
+            ////////////////////////////// After clicking on play all the other timers need to be start
+            }
+
+            if (congrats.currentSelection == 1) { // CLICK ON Menu
+                gameState = 0;
+            }
+            }
+
             }
         }
     }
