@@ -13,6 +13,7 @@ everything related to Menu would happen here.
 
 public class Menu{
 
+
     private final Button[] options; // options is an array of several Buttons for the main menu
     // They would be the "PLAY" "OPTIONS" "SHOP" & "EXIT" buttons.
     // check the "Button.java" class for more details on this object. (button)

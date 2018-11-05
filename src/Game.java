@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
@@ -37,7 +38,7 @@ private Timer obstacleTimer;    //timer for obstacles
 private Timer shooterTimer;     //timer for shooter
 private Timer levelTimer;    //timer for time left to beat the level
 private boolean musicOption = true;
-private static boolean soundOption = false;
+private static boolean soundOption = true;
 private Menu menu; // menu object
 private Congrats congrats;
 
@@ -160,19 +161,24 @@ private void drawGame(Graphics g){
 
     //draw timer
     int tempTime = levelTime/1000;
+    g.setColor(Color.black);
+    Font small = menu.loadFont();  //creating new font object
+    small = small.deriveFont(Font.BOLD, 30);
+    g.setFont(small);
     String msg = "Time: " +String.valueOf((tempTime/60))+":"+String.valueOf((tempTime%60));   //time in format M:SS
-    Font small = new Font("Helvetica", Font.BOLD, 30);
     FontMetrics fm = getFontMetrics(small);
 
-    g.setColor(Color.black);
-    g.setFont(small);
+
     g.drawString(msg,  0, fm.getHeight());
 }
+
+
 
 private void drawGameOver(Graphics g){  //draws game over screen
 
     String msg = "Game Over";
-    Font small = new Font("Helvetica", Font.BOLD, 30);  //creating new font object
+    Font small = menu.loadFont();  //creating new font object
+    small = small.deriveFont(Font.BOLD, 30);
     FontMetrics fm = getFontMetrics(small);     //creating new font metrics object with dimensions of our font
     setBackground(Color.black);
 
@@ -351,7 +357,13 @@ private void initLives(){   //creates 3 heart objects and adds them to lives lis
 }
 
 private void initBackgroundMusic() { // method to load background music
-        URL url = this.getClass().getResource("/backgroundMusic.wav"); // url to background Music file
+    URL url;
+    if(musicOption) {
+        url = this.getClass().getResource("/backgroundMusic.wav"); // url to background Music file
+    }
+    else{
+        url = this.getClass().getResource("/soundoff.wav"); // url to background Music file
+    }
         backgroundMusic = Applet.newAudioClip(url); // background music object
 }
 
@@ -516,6 +528,7 @@ public static int getWindowHeight(){
                 initTimers();
                 player = new Player();
                 initLives();
+                backgroundMusic.play();
 
 
                 //////////////// ATTENTION /////////////////
