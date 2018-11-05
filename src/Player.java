@@ -136,7 +136,7 @@ public class Player extends Sprite {
     }
 
 
-    public void keyRelesed(KeyEvent e){
+    public void keyReleased(KeyEvent e){
 
         int key = e.getKeyCode();
 
