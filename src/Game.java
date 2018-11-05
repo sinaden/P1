@@ -26,7 +26,7 @@ private Shooter shooter;    //shooter object
 private int gameState = 0;  //0-game menu, 1-game, 2-game over screen, 3-congrats screen
 private ArrayList<Background> background;
 private ArrayList<BgSprite> bgSprites;  //list with all background sprites visible on screen
-private ArrayList<Obstacle> obstacles;  //list with all obstacles visfible on screen
+private ArrayList<Obstacle> obstacles;  //list with all obstacles visible on screen
 private ArrayList<Heart> lives;   //list with all hearts visible on screen
 private ArrayList<Bullet> bullets;  //list with all bullets visible on screen
 private ArrayList<Danger> danger;   //list with all danger sings visible on screen
@@ -430,7 +430,7 @@ public static int getWindowHeight(){
         public void keyReleased(KeyEvent e){
 
             if (gameState == 0) {
-                menu.keyReleased(e);
+                menu.keyRelesed(e);
             }
 
             if (gameState == 1) {
@@ -483,8 +483,11 @@ public static int getWindowHeight(){
 
             if (congrats.currentSelection == 0) { // CLICK ON NextLevel
                 gameState = 1;
+                levelNum++;
                 initTimers();
-            //    initTimersForLevelTwo();
+                player = new Player();
+                initLives();
+
 
                 //////////////// ATTENTION /////////////////
             ////////////////////////////// After clicking on play all the other timers need to be start
