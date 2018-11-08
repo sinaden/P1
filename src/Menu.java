@@ -3,14 +3,11 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.InputStream;
 
-/*
-
-The main Class for executing the Menu.
-except some small calls in the Game.java,
-everything related to Menu would happen here.
-
+/**
+ * The main Class for executing the Menu.
+ * except some small calls in the Game.java,
+ * everything related to Menu would happen here.
  */
-
 public class Menu{
 
 

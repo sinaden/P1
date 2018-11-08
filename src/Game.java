@@ -42,6 +42,11 @@ private static boolean soundOption = true;
 private Menu menu; // menu object
 private Congrats congrats;
 
+    private Shop shop; // shop object
+
+    private int MenuState = 0;
+
+
 
 public Game(){
     initGame();
@@ -67,6 +72,9 @@ private void initGame(){
     if(gameState < 2){   //Game state 0 (menu) or 1 (actual game)
 
         menu = new Menu(); // menu object from Menu class is created
+
+        shop = new Shop();
+
         backgroundMusic.play();
 
         congrats = new Congrats(); //congrats object created
@@ -93,8 +101,15 @@ public void paintComponent(Graphics g){     //draws everything on screen
 
     if (gameState == 0){
 
-        drawMenu(g);
+        if (MenuState == 2) {
+            drawShop(g);
+        }
+        else {
+            drawMenu(g);
+        }
+
     }
+
     if(gameState == 1){
 
         drawGame(g);
@@ -118,6 +133,10 @@ private void drawMenu(Graphics g) { // draws menu scene
     menu.render(g);
 
 
+}
+
+private void drawShop(Graphics g) {
+    shop.render(g);
 }
 
 private void drawGame(Graphics g){
@@ -500,6 +519,10 @@ public static int getWindowHeight(){
                         gameState = 1;
                         initTimers(); //////////////// ATTENTION /////////////////
                         ////////////////////////////// After clicking on play all the other timers need to be start
+                    }
+
+                    if (menu.currentSelection == 2) {
+                        MenuState = 2;
                     }
 
                     if (menu.currentSelection == 3) { // CLICK ON EXIT
