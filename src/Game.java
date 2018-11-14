@@ -41,10 +41,8 @@ private boolean musicOption = true;
 private static boolean soundOption = true;
 private Menu menu; // menu object
 private Congrats congrats;
-
-    private Shop shop; // shop object
-
-    private int MenuState = 0;
+private Shop shop; // shop object
+private int MenuState = 0;
 
 
 
