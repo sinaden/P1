@@ -119,6 +119,9 @@ public class Player extends Sprite {
         }
     }
 
+    /**
+     *
+     */
     public void obstacleHit(){  //player is moved 40 pixels back if he hits the obstacle
 
         x-=40;
