@@ -120,7 +120,7 @@ public class Menu{
     }
 
 
-    public void keyRelesed(KeyEvent e){
+    public void keyReleased(KeyEvent e){
 
         int key = e.getKeyCode();
         xd = 0;

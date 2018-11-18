@@ -42,7 +42,9 @@ private static boolean soundOption = true;
 private Menu menu; // menu object
 private Congrats congrats;
 private Shop shop; // shop object
-private int MenuState = 0;
+private Options options; // options object
+private Pause pause; // pause object
+public int MenuState = 0;
 
 
 
@@ -73,7 +75,9 @@ private void initGame(){
 
         shop = new Shop();
 
-        backgroundMusic.play();
+        options = new Options();
+
+        pause = new Pause();
 
         congrats = new Congrats(); //congrats object created
 
@@ -102,6 +106,9 @@ public void paintComponent(Graphics g){     //draws everything on screen
         if (MenuState == 2) {
             drawShop(g);
         }
+        if (MenuState == 1) {
+            drawOptions(g);
+        }
         else {
             drawMenu(g);
         }
@@ -114,11 +121,14 @@ public void paintComponent(Graphics g){     //draws everything on screen
     }
     if(gameState == 2){
 
-            drawGameOver(g);
+        drawGameOver(g);
     }
     if(gameState == 3){
 
         drawCongrats(g);
+    }
+    if (gameState == 4){
+        drawPause(g);
     }
 
 
@@ -135,6 +145,14 @@ private void drawMenu(Graphics g) { // draws menu scene
 
 private void drawShop(Graphics g) {
     shop.render(g);
+}
+
+private void drawOptions(Graphics g) {
+    options.render(g);
+}
+
+private void drawPause(Graphics g) {
+    pause.render(g);
 }
 
 private void drawGame(Graphics g){
@@ -221,7 +239,10 @@ public void actionPerformed(ActionEvent e){     //actions performed by mainTimer
 
 
     if(gameState == 0){
-        menu.tick(); // Update the menu
+       menu.tick(); // Update the menu
+        backgroundMusic.play();
+        if (MenuState == 1)
+            options.tick();
     }
 
     if (gameState == 1) {
@@ -241,6 +262,10 @@ public void actionPerformed(ActionEvent e){     //actions performed by mainTimer
         congrats.tick();
         backgroundMusic.stop();
         congratsSound.play();
+    }
+
+    if (gameState == 4) {
+        pause.tick();
     }
     repaint();
 }
@@ -372,6 +397,9 @@ private void initLives(){   //creates 3 heart objects and adds them to lives lis
         lives.add(new Heart(windowWidth-(55+(i*55)), 0));
     }
 }
+    public static boolean getSoundOption(){
+        return soundOption;
+    }
 
 private void initBackgroundMusic() { // method to load background music
     URL url;
@@ -412,9 +440,7 @@ private void initSounds(){  //method to load all game sounds
     }
 }
 
-public static boolean getSoundOption(){
-    return soundOption;
-}
+
 
 private void initTimers(){   //starts all timers except main timer which is started at the first steps
 
@@ -488,7 +514,13 @@ public static int getWindowHeight(){
         public void keyReleased(KeyEvent e){
 
             if (gameState == 0) {
-                menu.keyRelesed(e);
+               if (MenuState == 0) {
+                   menu.keyReleased(e);
+               }
+               if (MenuState == 1) {
+                   options.keyReleased(e);
+               }
+
             }
 
             if (gameState == 1) {
@@ -507,24 +539,56 @@ public static int getWindowHeight(){
 
             if (gameState == 1) {
                 player.keyPressed(e);
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    gameState = 4;
+                    obstacleTimer.stop();
+                    shooterTimer.stop();
+                    levelTimer.stop();
+                }
             }
 
             if(gameState == 0) {
-                menu.keyPressed(e);
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                if (MenuState == 0) {
+                    menu.keyPressed(e);
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
-                    if (menu.currentSelection == 0) { // CLICK ON PLAY
-                        gameState = 1;
-                        initTimers(); //////////////// ATTENTION /////////////////
-                        ////////////////////////////// After clicking on play all the other timers need to be start
+                        if (menu.currentSelection == 0) { // CLICK ON PLAY
+                            gameState = 1;
+                            initTimers(); //////////////// ATTENTION /////////////////
+                            ////////////////////////////// After clicking on play all the other timers need to be start
+                        }
+
+                        if (menu.currentSelection == 1) { // OPTIONS
+                            MenuState = 1;
+                        }
+
+                        if (menu.currentSelection == 2) {
+                            MenuState = 2;
+                        }
+
+                        if (menu.currentSelection == 3) { // CLICK ON EXIT
+                            System.exit(1);
+                        }
                     }
+                }
+                if (MenuState == 1) {
+                    options.keyPressed(e);
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
-                    if (menu.currentSelection == 2) {
-                        MenuState = 2;
-                    }
+                        if (options.currentSelection == 0) { // turn off background music
+                           // URL url;
+                           // url = this.getClass().getResource("/soundoff.wav");
+                            //backgroundMusic = Applet.newAudioClip(url);
+                            musicOption = false;
+                        }
 
-                    if (menu.currentSelection == 3) { // CLICK ON EXIT
-                        System.exit(1);
+                        if (options.currentSelection == 1) { // turn off sound effects
+                            soundOption = false;
+                        }
+
+                        if (options.currentSelection == 2) { // goes back
+                            MenuState = 0;
+                        }
                     }
                 }
             }
@@ -538,29 +602,53 @@ public static int getWindowHeight(){
                     initTimers();
                 }
             }
-            if(gameState == 3){
+            if(gameState == 3) {
                 congrats.keyPressed(e);
 
-            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
-            if (congrats.currentSelection == 0) { // CLICK ON NextLevel
-                gameState = 1;
-                levelNum++;
-                initTimers();
-                player = new Player();
-                initLives();
-                backgroundMusic.play();
+                    if (congrats.currentSelection == 0) { // CLICK ON NextLevel
+                        gameState = 1;
+                        levelNum++;
+                        initTimers();
+                        player = new Player();
+                        initLives();
+                        backgroundMusic.play();
 
 
-                //////////////// ATTENTION /////////////////
-            ////////////////////////////// After clicking on play all the other timers need to be start
+                        //////////////// ATTENTION /////////////////
+                        ////////////////////////////// After clicking on play all the other timers need to be start
+                    }
+
+                    if (congrats.currentSelection == 1) { // CLICK ON Menu
+                        gameState = 0;
+                    }
+                }
+
             }
+            if (gameState == 4) {
+                pause.keyPressed(e);
 
-            if (congrats.currentSelection == 1) { // CLICK ON Menu
-                gameState = 0;
-            }
-            }
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
+                    if (pause.currentSelection == 0) {
+                        gameState = 1;
+                        obstacleTimer.start();
+                        shooterTimer.start();
+                        levelTimer.start();
+                    }
+                    if (pause.currentSelection == 1) {
+                        gameState = 0;
+                        MenuState = 1;
+                    }
+                    if (pause.currentSelection == 2) {
+                        gameState = 0;
+                        MenuState = 2;
+                    }
+                    if (pause.currentSelection == 3) {
+                        System.exit(1);
+                    }
+                }
             }
         }
     }
