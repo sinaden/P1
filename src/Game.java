@@ -37,8 +37,8 @@ private Timer bgSpriteTimer;     //timer for background sprites
 private Timer obstacleTimer;    //timer for obstacles
 private Timer shooterTimer;     //timer for shooter
 private Timer levelTimer;    //timer for time left to beat the level
-private boolean musicOption = true;
-private static boolean soundOption = true;
+private boolean musicOption;
+private static boolean soundOption;
 private Menu menu; // menu object
 private Congrats congrats;
 private Shop shop; // shop object
@@ -60,6 +60,8 @@ private void initGame(){
     setDoubleBuffered(true);
     initSounds();
     initBackgroundMusic();
+    musicOption=true;
+    soundOption=true;
 
     //creates timer with delay of our DELAY variable,
     // It's the main Timer which should be created separately at the top of the program
@@ -576,14 +578,12 @@ public static int getWindowHeight(){
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
                         if (options.currentSelection == 0) { // turn off background music
-                           // URL url;
-                           // url = this.getClass().getResource("/soundoff.wav");
-                            //backgroundMusic = Applet.newAudioClip(url);
-                            musicOption = false;
+
+                            musicOption = !musicOption;
                         }
 
                         if (options.currentSelection == 1) { // turn off sound effects
-                            soundOption = false;
+                            soundOption = !soundOption;
                         }
 
                         if (options.currentSelection == 2) { // goes back
