@@ -1,18 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.InputStream;
 
-/*
+public class Options extends Menu{
 
-The main Class for executing the Menu.
-except some small calls in the Game.java,
-everything related to Menu would happen here.
-
- */
-
-public class Congrats extends Menu{
-
-    private final Button[] Options; // options is an array of several Buttons for the main menu
+    private final Button[] Options2; // options is an array of several Buttons for the main menu
     // They would be the "PLAY" "OPTIONS" "SHOP" & "EXIT" buttons.
     // check the "Button.java" class for more details on this object. (button)
 
@@ -22,13 +15,24 @@ public class Congrats extends Menu{
 
     private int xd; // if it's +1 the current Selection would go up and if it's -1, it goes down
     private boolean stopHere = false; // If it's true, the menu could not be updated
-    // (used for not changing the currentselected when user's finger is still on the keyboard.)
+    // (used for not changing the currentselection when user's finger is still on the keyboard.)
 
+    public Font loadFont(){
+        try {
+            String fName = "/DK Cool Crayon.ttf";
+            InputStream is = this.getClass().getResourceAsStream(fName);
+            Font font = Font.createFont(Font.TRUETYPE_FONT, is);
+            return font;
+        }
+        catch (Exception e){
+            return null;
+        }
+    }
 
 
     // Constructor
-    public Congrats() {
-        Options = new Button[2];
+    public Options() {
+        Options2 = new Button[3];
 
         Font fontSmall= loadFont();
         fontSmall = fontSmall.deriveFont(Font.BOLD, 70);
@@ -38,14 +42,18 @@ public class Congrats extends Menu{
         // Options array would be made here, remember that TTF file for the "DK Cool Crayon"
         // Font should be added to JVM fonts folder
 
-        Options[0] = new Button("Next level",  300 + 0 * 76,
+        Options2[0] = new Button("Music",300 + 0 * 76,
                 fontSmall, // The text format when it's not selected
                 fontBig,// The text format when it's selected,
                 // the only change is the size
                 Color.WHITE, Color.WHITE); // The colors don't change but we can change them
         // if it's was to be.
 
-        Options[1] = new Button("Menu",  300 + 1 * 76,
+        Options2[1] = new Button("Sound effects", 300 + 1 * 76,
+                fontSmall,
+                fontBig, Color.WHITE, Color.WHITE);
+
+        Options2[2] = new Button("Back", 300 + 2 * 76,
                 fontSmall,
                 fontBig, Color.WHITE, Color.WHITE);
     }
@@ -69,11 +77,11 @@ public class Congrats extends Menu{
         // (i.e it points to a button which is upper than the first button ,"PLAY")
         // then it should be revalued to 3, so it would point to the "Exit" Button.
         if (currentSelection < 0) {
-            currentSelection = Options.length - 1;
+            currentSelection = Options2.length - 1;
         }
 
         // The same should be done for the other way
-        if (currentSelection >= Options.length) {
+        if (currentSelection >= Options2.length) {
             currentSelection = 0;
         }
     }
@@ -92,14 +100,12 @@ public class Congrats extends Menu{
         }
     }
 
-
     public void keyReleased(KeyEvent e){
 
         int key = e.getKeyCode();
         xd = 0;
         stopHere = false;
     }
-
 
     public void render(Graphics g) { // This method draws the whole menu
         // (is called at the drawMenu method of Game.java)
@@ -114,20 +120,20 @@ public class Congrats extends Menu{
         fontBig = fontBig.deriveFont(Font.BOLD, 80);
 
 
-        // Drawing the title Good Job!
+        // Drawing the title OPTIONS
         Fonts.drawString(g, fontBig,
-                Color.WHITE, "Good Job!", 100);
+                Color.WHITE, "OPTIONS", 100);
 
 
-        // Rendereing every Button, And implementing the "currentSelection"
+        // Rendering every Button, And implementing the "currentSelection"
         // to the button by changing the selected variable of that button
-        for (int i = 0; i < Options.length; i++) {
+        for (int i = 0; i < Options2.length; i++) {
 
             if (i == currentSelection)
-                Options[i].setSelected(true);
+                Options2[i].setSelected(true);
             else
-                Options[i].setSelected(false);
-            Options[i].render(g);
+                Options2[i].setSelected(false);
+            Options2[i].render(g);
         }
     }
 }
