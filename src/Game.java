@@ -34,7 +34,7 @@ private int obstacleTimer =0;
 private int shooterTimer =0;
 private boolean timersOn;
 private int shooterRandomTimer;
-private boolean musicOption;
+private static boolean musicOption;
 private static boolean soundOption;
 private Menu menu; // menu object
 private Congrats congrats;
@@ -430,6 +430,8 @@ private void initLives(){   //creates 3 heart objects and adds them to lives lis
         return soundOption;
     }
 
+    public static boolean getMusicOption() { return musicOption;}
+
 private void initBackgroundMusic() { // method to load background music
     URL url;
     if(musicOption) {
@@ -647,6 +649,7 @@ public static int getWindowHeight(){
                         if (options.currentSelection == 1) { // turn off sound effects
                             soundOption = !soundOption;
                             initSounds();
+                            System.out.println(soundOption);
                         }
 
                         if (options.currentSelection == 2) { // goes back
@@ -701,14 +704,6 @@ public static int getWindowHeight(){
                         timersOn=true;
                     }
                     if (pause.currentSelection == 1) {
-                        gameState = 0;
-                        MenuState = 1;
-                    }
-                    if (pause.currentSelection == 2) {
-                        gameState = 0;
-                        MenuState = 2;
-                    }
-                    if (pause.currentSelection == 3) {
                         System.exit(1);
                     }
                 }

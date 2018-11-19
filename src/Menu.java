@@ -1,3 +1,5 @@
+import com.sun.javafx.iio.ImageLoader;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -16,6 +18,7 @@ public class Menu{
     // check the "Button.java" class for more details on this object. (button)
 
     private Image menuOne; // The background Image of the menu
+
     public int currentSelection;// Which button the user is on now
     // Numbers would be 0 for "PLAY", 1 for "OPTIONS", 2 for "SHOPS" & 3 for "EXIT"
 
