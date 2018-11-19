@@ -10,6 +10,9 @@ public class Options extends Menu{
     // check the "Button.java" class for more details on this object. (button)
 
     private Image menuOne; // The background Image of the menu
+    private Image sound;
+    private Image music;
+
     public int currentSelection;// Which button the user is on now
     // Numbers would be 0 for "PLAY", 1 for "OPTIONS", 2 for "SHOPS" & 3 for "EXIT"
 
@@ -115,6 +118,29 @@ public class Options extends Menu{
         ImageIcon ii = new ImageIcon(this.getClass().getResource("/bboard.png"));   //assigns image icon based on given url
         menuOne = ii.getImage();  //ImageIcon method to assign image icon from ii object to image
         g2d.drawImage(menuOne, 0, 0, null);
+
+        if (Game.getSoundOption() == true) {
+            ImageIcon i = new ImageIcon(this.getClass().getResource("/soundon.png"));   //assigns image icon based on given url
+            sound = i.getImage();  //ImageIcon method to assign image icon from ii object to image
+        //    int width = sound.getWidth(null);
+            g2d.drawImage(sound, 970, 0,null);
+        }
+        else {
+            ImageIcon i = new ImageIcon(this.getClass().getResource("/soundoff.png"));   //assigns image icon based on given url
+            sound = i.getImage();  //ImageIcon method to assign image icon from ii object to image
+            g2d.drawImage(sound, 970, 0, null);
+        }
+
+        if (Game.getMusicOption() == true) {
+            ImageIcon i = new ImageIcon(this.getClass().getResource("/musicon.png"));   //assigns image icon based on given url
+            music = i.getImage();  //ImageIcon method to assign image icon from ii object to image
+            g2d.drawImage(music, 922, 0, null);
+        }
+        else {
+            ImageIcon i = new ImageIcon(this.getClass().getResource("/musicoff.png"));   //assigns image icon based on given url
+            music = i.getImage();  //ImageIcon method to assign image icon from ii object to image
+            g2d.drawImage(music, 922, 0, null);
+        }
 
         Font fontBig = loadFont();
         fontBig = fontBig.deriveFont(Font.BOLD, 80);

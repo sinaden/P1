@@ -32,7 +32,7 @@ public class Pause extends Menu{
 
     // Constructor
     public Pause() {
-        Options2 = new Button[4];
+        Options2 = new Button[2];
 
         Font fontSmall= loadFont();
         fontSmall = fontSmall.deriveFont(Font.BOLD, 70);
@@ -49,15 +49,7 @@ public class Pause extends Menu{
                 Color.WHITE, Color.WHITE); // The colors don't change but we can change them
         // if it's was to be.
 
-        Options2[1] = new Button("Options", 300 + 1 * 76,
-                fontSmall,
-                fontBig, Color.WHITE, Color.WHITE);
-
-        Options2[2] = new Button("Shop",  300 + 2 * 76,
-                fontSmall,
-                fontBig, Color.WHITE, Color.WHITE);
-
-        Options2[3] = new Button("Exit", 300 + 3 * 76,
+        Options2[1] = new Button("Exit", 300 + 1 * 76,
                 fontSmall,
                 fontBig, Color.WHITE, Color.WHITE);
     }
