@@ -34,6 +34,7 @@ private int obstacleTimer =0;
 private int shooterTimer =0;
 private boolean timersOn;
 private int shooterRandomTimer;
+private int spritesRandomTimer;
 private static boolean musicOption;
 private static boolean soundOption;
 private Menu menu; // menu object
@@ -69,7 +70,7 @@ private void initGame(){
 
 
 
-    if(gameState < 2){   //Game state 0 (menu) or 1 (actual game)
+    if(gameState <2) {   //Game state 0 (menu) or 1 (actual game)
 
         menu = new Menu(); // menu object from Menu class is created
 
@@ -78,6 +79,7 @@ private void initGame(){
         options = new Options();
 
         pause = new Pause();
+
 
         congrats = new Congrats(); //congrats object created
 
@@ -110,7 +112,7 @@ public void paintComponent(Graphics g){     //draws everything on screen
         if (MenuState == 1) {
             drawOptions(g);
         }
-        else {
+        if (MenuState == 0) {
             drawMenu(g);
         }
 
@@ -253,6 +255,8 @@ public void actionPerformed(ActionEvent e){     //actions performed by mainTimer
        menu.tick(); // Update the menu
         if (MenuState == 1)
             options.tick();
+        if(MenuState == 2)
+            shop.tick();
     }
 
     if (gameState == 1) {
@@ -482,6 +486,8 @@ private void initTimers(){   //starts all timers except main timer which is star
 
     shooterRandomTimer = new Random().nextInt(420)+180;
 
+    spritesRandomTimer = new Random().nextInt(40)+50;
+
    /* bgSprites = new ArrayList<>();
     bgSpriteTimer = new Timer(3000, e -> {      //creates timer that will add new background sprite every 3 seconds
         bgSprites.add(new BgSprite(windowWidth, new Random().nextInt(windowHeight/3)+1));   //adds new BgSprite object to bgSprites list at random y position
@@ -528,9 +534,10 @@ private void Timers(){
             levelTimer+=1;
             obstacleTimer+=1;
             shooterTimer+=1;
-            if(obstacleTimer==90){
+            if(obstacleTimer==spritesRandomTimer){
                 sprites.add(new Obstacle(windowWidth, windowHeight, new Random().nextInt(3)+1));
                 obstacleTimer=0;
+                spritesRandomTimer=new Random().nextInt(40)+50;
             }
             if(shooterTimer==shooterRandomTimer){
                 sprites.add(new Danger(0, shooter.getY()-15));    //ads danger icon above the shooter
@@ -585,6 +592,9 @@ public static int getWindowHeight(){
                if (MenuState == 1) {
                    options.keyReleased(e);
                }
+               if(MenuState == 2){
+                   shop.keyRelesed(e);
+               }
 
             }
 
@@ -625,10 +635,13 @@ public static int getWindowHeight(){
 
                         if (menu.currentSelection == 1) { // OPTIONS
                             MenuState = 1;
+                            options.currentSelection=0;
+                            musicOption =!musicOption;
                         }
 
                         if (menu.currentSelection == 2) {
                             MenuState = 2;
+                            shop.currentSelection = 0;
                         }
 
                         if (menu.currentSelection == 3) { // CLICK ON EXIT
@@ -649,10 +662,19 @@ public static int getWindowHeight(){
                         if (options.currentSelection == 1) { // turn off sound effects
                             soundOption = !soundOption;
                             initSounds();
-                            System.out.println(soundOption);
+                            player.setPlayerSound();
                         }
 
                         if (options.currentSelection == 2) { // goes back
+                            MenuState = 0;
+                        }
+                    }
+                }
+                if(MenuState==2){
+                    shop.keyPressed(e);
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        if (shop.currentSelection == 6) {
+                            System.out.println("Back to menu");
                             MenuState = 0;
                         }
                     }
