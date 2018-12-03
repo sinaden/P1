@@ -6,349 +6,368 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.InputStream;
+import java.io.File;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Game extends JPanel implements ActionListener {
 
-private static int windowWidth = 1024;  //window's width
-private static int windowHeight = 720;  //window's height
-private final int DELAY = 16;   //delay between each frame
-private int levelTime = 60000;  //default time for level, will be multiplied by levelNum
-private int levelNum = 1;   //number of chosen level
-private AudioClip damageSound;   //audio of damage sound
-private AudioClip dangerSound;  //audio of danger sound
-private AudioClip gameOverSound;//audio of game over screen
-private AudioClip congratsSound; //audio of when you finish a level
-private AudioClip backgroundMusic; // music playing in the background
-private Player player;  //player object
-private Shooter shooter;    //shooter object
-private int gameState = 0;  //0-game menu, 1-game, 2-game over screen, 3-congrats screen
-private ArrayList<Sprite> sprites;
-private Timer mainTimer;    //main timer for the game
-private int livesNum;
-private int levelTimer =0;
-private int obstacleTimer =0;
-private int shooterTimer =0;
-private boolean timersOn;
-private int shooterRandomTimer;
-private int spritesRandomTimer;
-private static boolean musicOption;
-private static boolean soundOption;
-private Menu menu; // menu object
-private Congrats congrats;
-private Shop shop; // shop object
-private Options options; // options object
-private Pause pause; // pause object
-public int MenuState = 0;
+    private static final int windowWidth = 1024;  //window's width
+    private static final int windowHeight = 720;  //window's height
+    private final int DELAY = 16;   //delay between each frame
+    private int levelTime;  //default time for level, will be multiplied by levelNum
+    private int levelNum;   //number of chosen level
+    private AudioClip damageSound;   //audio of damage sound
+    private AudioClip dangerSound;  //audio of danger sound
+    private AudioClip gameOverSound;//audio of game over screen
+    //private AudioClip congratsSound; //audio of when you finish a level
+    private AudioClip backgroundMusic; // music playing in the background
+    private Player player;  //player object
+    private Shooter shooter;    //shooter object
+    private int gameState = 0;  //0-game menu, 1-game, 2-game over screen, 3-congrats screen
+    private ArrayList<Sprite> sprites;
+    private Timer mainTimer;    //main timer for the game
+    private int livesNum;
+    private int levelTimer;
+    private int obstacleTimer;
+    private int shooterTimer;
+    private boolean timersOn;
+    private int shooterRandomTimer;
+    private int spritesRandomTimer;
+    private static boolean musicOption;
+    private static boolean soundOption;
+    private Menu menu; // menu object
+    private CongratsScreen congratsScreen; // congrats screen object
+    private Shop shop; // shop object
+    private Options options; // options object
+    private Pause pause; // pause object
+    private GameOverScreen gameOverScreen; //game over screen object
+    private Levels levels; // levels object
+    private int MenuState = 0;
+    private static int levelsUnlocked = 2;
 
 
+    public Game() {
+        initGame();
+    }
 
-public Game(){
-    initGame();
-}
+    private void initGame() {
 
-private void initGame(){
-
-    addKeyListener(new TAdapter());
-    setFocusable(true);
-    setBackground(Color.cyan);  //when we have our background ready it will be deleted
-    setDoubleBuffered(true);
-    musicOption=true;
-    soundOption=true;
-    initSounds();
-    initBackgroundMusic();
-
-
-    //creates timer with delay of our DELAY variable,
-    // It's the main Timer which should be created separately at the top of the program
-    // (Other timers regarding sprites are created at initTime() method
-    mainTimer = new Timer(DELAY, this);
-    mainTimer.start();  //starts mainTimer
+        addKeyListener(new TAdapter());
+        setFocusable(true);
+        setBackground(Color.cyan);  //when we have our background ready it will be deleted
+        setDoubleBuffered(true);
+        musicOption = true;
+        soundOption = true;
+        initSounds();
+        initBackgroundMusic();
+        loadSave();
 
 
+        //creates timer with delay of our DELAY variable,
+        // It's the main Timer which should be created separately at the top of the program
+        // (Other timers regarding sprites are created at initTime() method
+        mainTimer = new Timer(DELAY, this);
+        mainTimer.start();  //starts mainTimer
 
-    if(gameState <2) {   //Game state 0 (menu) or 1 (actual game)
+        newMenu();
+    }
 
+    private void newGame() {
+        pause = new Pause();
+
+        congratsScreen = new CongratsScreen(); //congrats screen object created
+
+        gameOverScreen = new GameOverScreen(); // game over screen object created
+
+        levelTime *= levelNum;  //this will make levelTime scale up incredibly fast //time needed to complete level, levelNum will be decided in the menu
+
+        player = new Player();  //creates new Player object
+
+        shooter = new Shooter(0, player.getY());    //creates new Shooter object on the edge of the screen and the same floor level as player
+
+        sprites = new ArrayList<>(11);
+        for (int i = 0; i < 11; i++) {
+            sprites.add(null);
+        }
+        initLives();
+        sprites.set(4, new Background(0, new Random().nextInt(5) + 1));
+        sprites.set(5, new Background(0, new Random().nextInt(5) + 1));
+
+    }
+
+    private void newMenu() {
         menu = new Menu(); // menu object from Menu class is created
 
         shop = new Shop();
 
         options = new Options();
 
-        pause = new Pause();
-
-
-        congrats = new Congrats(); //congrats object created
-
-        levelTime *= levelNum;  //this will make levelTime scale up incredibly fast //time needed to complete level, levelNum will be decided in the menu
-        player = new Player();  //creates new Player object
-
-        shooter = new Shooter(0, player.getY());    //creates new Shooter object on the edge of the screen and the same floor level as player
-
-        sprites = new ArrayList<>();
-        sprites.add(new Background(0, 0, new Random().nextInt(5)+1));
-
-        shooter = new Shooter(0, player.getY());    //creates new Shooter object on the edge of the
-        // screen and the same floor level as player
-
-        initLives();
+        levels = new Levels(); // levels object
     }
 
-}
+    private void closeGame() {
+        pause = null;
 
+        congratsScreen = null;
 
-@Override
-public void paintComponent(Graphics g){     //draws everything on screen
-    super.paintComponent(g);
+        gameOverScreen = null;
 
-    if (gameState == 0){
+        levelTime = 60;
 
-        if (MenuState == 2) {
-            drawShop(g);
+        player = null;
+
+        shooter = null;
+
+        sprites = null;
+    }
+
+    private void closeMenu() {
+        menu = null;
+
+        shop = null;
+
+        options = null;
+
+        levels = null;
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {     //draws everything on screen
+        super.paintComponent(g);
+
+        if (gameState == 0) {
+
+            if (MenuState == 3) {
+                drawShop(g);
+            }
+            if (MenuState == 2) {
+                drawOptions(g);
+            }
+            if (MenuState == 1) {
+                drawLevels(g);
+            }
+            if (MenuState == 0) {
+                drawMenu(g);
+            }
+
         }
-        if (MenuState == 1) {
-            drawOptions(g);
+
+        if (gameState == 1) {
+
+            drawGame(g);
         }
-        if (MenuState == 0) {
-            drawMenu(g);
+
+        if (gameState == 2) {
+
+            drawGameOverScreen(g);
+        }
+        if (gameState == 3) {
+
+            drawCongratsScreen(g);
+        }
+        if (gameState == 4) {
+            drawPause(g);
         }
 
-    }
 
-    if(gameState == 1){
-
-        drawGame(g);
-    }
-    if(gameState == 2){
-
-        drawGameOver(g);
-    }
-    if(gameState == 3){
-
-        drawCongrats(g);
-    }
-    if (gameState == 4){
-        drawPause(g);
+        Toolkit.getDefaultToolkit().sync();
     }
 
 
-    Toolkit.getDefaultToolkit().sync();
-}
+    private void drawMenu(Graphics g) { // draws menu scene
+
+        menu.render(g);
 
 
-private void drawMenu(Graphics g) { // draws menu scene
+    }
 
-    menu.render(g);
+    private void drawShop(Graphics g) {
+        shop.render(g);
+    }
 
+    private void drawOptions(Graphics g) {
+        options.render(g);
+    }
 
-}
+    private void drawPause(Graphics g) {
+        pause.render(g);
+    }
 
-private void drawShop(Graphics g) {
-    shop.render(g);
-}
+    private void drawLevels(Graphics g) {
+        levels.render(g);
+    }
 
-private void drawOptions(Graphics g) {
-    options.render(g);
-}
-
-private void drawPause(Graphics g) {
-    pause.render(g);
-}
-
-private void drawGame(Graphics g){
+    private void drawGame(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
 
         //draw Background
-        for(Sprite background : sprites){
-            if(background instanceof Background) {
-                g2d.drawImage(background.getImage(), background.getX(), background.getY(), this);
-            }
-        }
-
-        //draw BgSprites
-   /* for(BgSprite bgSprite : bgSprites){
-        g2d.drawImage(bgSprite.getImage(), bgSprite.getX(), bgSprite.getY(), this);
-    }*/
+        g2d.drawImage(sprites.get(livesNum + 1).getImage(), sprites.get(livesNum + 1).getX(), sprites.get(livesNum + 1).getY(), this);
+        g2d.drawImage(sprites.get(livesNum + 2).getImage(), sprites.get(livesNum + 2).getX(), sprites.get(livesNum + 2).getY(), this);
 
         //draw player
-        g2d.drawImage(player.getImage(),player.getX(), player.getY(), this);
+        g2d.drawImage(player.getImage(), player.getX(), player.getY(), this);
 
         //draw shooter
         g2d.drawImage(shooter.getImage(), shooter.getX(), shooter.getY(), this);
 
         //draw obstacles
-        for(Sprite obstacle : sprites){
-            if(obstacle instanceof Obstacle) {
-                g2d.drawImage(obstacle.getImage(), obstacle.getX(), obstacle.getY(), this);
-            }
-        }
+        if (sprites.get(livesNum + 4) instanceof Obstacle)
+        g2d.drawImage(sprites.get(livesNum + 4).getImage(), sprites.get(livesNum + 4).getX(), sprites.get(livesNum + 4).getY(), this);
+        if (sprites.get(livesNum + 5) instanceof Obstacle)
+            g2d.drawImage(sprites.get(livesNum + 5).getImage(), sprites.get(livesNum + 5).getX(), sprites.get(livesNum + 5).getY(), this);
+
 
         //draw lives
-        for(Sprite life : sprites){
-            if(life instanceof Heart) {
-                g2d.drawImage(life.getImage(), life.getX(), life.getY(), this);
-            }
+        for (int i = 0; i < livesNum; i++) {
+            g2d.drawImage(sprites.get(i).getImage(), sprites.get(i).getX(), sprites.get(i).getY(), this);
         }
 
-        //draw bullets
-        for(Sprite bullet : sprites){
-            if(bullet instanceof Bullet) {
-                g2d.drawImage(bullet.getImage(), bullet.getX(), bullet.getY(), this);
-            }
-        }
+        //draw bullets/danger
+        if (sprites.get(livesNum + 7) instanceof Bullet || sprites.get(livesNum + 7) instanceof Danger)
+        g2d.drawImage(sprites.get(livesNum + 7).getImage(), sprites.get(livesNum + 7).getX(), sprites.get(livesNum + 7).getY(), this);
 
-        //draw danger
-        for(Sprite danger : sprites){
-            if(danger instanceof Danger) {
-                g2d.drawImage(danger.getImage(), danger.getX(), danger.getY(), this);
-            }
-        }
 
         //draw timer
-        int tempTime = levelTime;
         g.setColor(Color.black);
-        Font small = menu.loadFont();  //creating new font object
+        Font small = pause.loadFont();  //creating new font object
         small = small.deriveFont(Font.BOLD, 30);
         g.setFont(small);
-        String msg = "Time: " +String.valueOf((tempTime/60))+":"+String.valueOf((tempTime%60));   //time in format M:SS
+        String msg = "Time: " + String.valueOf((levelTime / 60)) + ":" + String.valueOf((levelTime % 60));   //time in format M:SS
         FontMetrics fm = getFontMetrics(small);
 
 
-        g.drawString(msg,  0, fm.getHeight());
-}
-
-
-
-private void drawGameOver(Graphics g){  //draws game over screen
-
-    String msg = "Game Over";
-    Font small = menu.loadFont();  //creating new font object
-    small = small.deriveFont(Font.BOLD, 30);
-    FontMetrics fm = getFontMetrics(small);     //creating new font metrics object with dimensions of our font
-    setBackground(Color.black);
-
-    g.setColor(Color.white);       //set's color of drawing tool to white
-    g.setFont(small);       //sets font of drawing tool to our font
-    g.drawString(msg, (windowWidth - fm.stringWidth(msg)) / 2, windowHeight / 2);   //draws string msg
-    int tempTime = levelTime;
-    msg = "Time: " +String.valueOf((tempTime/60))+":"+String.valueOf((tempTime%60));
-    g.drawString(msg, (windowWidth - fm.stringWidth(msg)) / 2, windowHeight / 2 + fm.getHeight());
-    g.drawString("-Press SPACE to retry-", (windowWidth/2) - (fm.stringWidth(msg)), windowHeight / 2 + (fm.getHeight()*3));
-}
-
-private void drawCongrats(Graphics g) { // draws congrats page
-
-       congrats.render(g);
-
-
-}
-
-
-@Override
-public void actionPerformed(ActionEvent e){     //actions performed by mainTimer
-
-
-    if(gameState == 0){
-       menu.tick(); // Update the menu
-        if (MenuState == 1)
-            options.tick();
-        if(MenuState == 2)
-            shop.tick();
+        g.drawString(msg, 0, fm.getHeight());
     }
 
-    if (gameState == 1) {
 
-        Timers();
-        updateSprites();
-        checkCollisions();
-        checkTimer();
+    private void drawGameOverScreen(Graphics g) {  //draws game over screen
+
+        gameOverScreen.render(g);
+        int tempTime = levelTime;
+        String msg = "Time: " + String.valueOf((tempTime / 60)) + ":" + String.valueOf((tempTime % 60));
+        FontMetrics fm = g.getFontMetrics();
+        int width = fm.stringWidth(msg) - msg.length();
+        // int width = getWindowWidth() - fm.stringWidth(msg) /2;
+        g.drawString(msg, width, 200);
     }
 
-    if(gameState == 2) {
-        stopTimers();
-        backgroundMusic.stop();
-        gameOverSound.play();
+    private void drawCongratsScreen(Graphics g) { // draws congrats screen
 
-    }
-    if(gameState == 3){
-     //   stopTimers();
-        congrats.tick();
-        backgroundMusic.stop();
-        congratsSound.play();
+        congratsScreen.render(g);
     }
 
-    if (gameState == 4) {
-        pause.tick();
-    }
-    repaint();
-}
 
-private void updateSprites(){
-
-    //updates player position and animation frame
-    player.animationFrame();
-    player.move();
-
-    //updates position of BgSprites and deletes ones that are out of screen
-/*    for(int i = 0; i < bgSprites.size(); i++){
+    @Override
+    public void actionPerformed(ActionEvent e) {     //actions performed by mainTimer
 
 
-        if(bgSprites.get(i).isVisible()){
-            bgSprites.get(i).move();
-        }
-        else{
-            bgSprites.remove(i);
+        if (gameState == 0) {
+            menu.tick(); // Update the menu
+            if (MenuState == 1)
+                levels.tick();
+            if (MenuState == 2)
+                options.tick();
+            if (MenuState == 3)
+                shop.tick();
         }
 
-    }
-*/
-    //updates position of background
-    for(int i = 0; i<sprites.size();i++) {
+        if (gameState == 1) {
 
-        if (sprites.get(i) instanceof Background) {
-            if (sprites.get(i).getX() == 0) {
-                sprites.add(new Background(windowWidth - ((Background) sprites.get(i)).getSpeed(), 0, new Random().nextInt(5) + 1));
+            Timers();
+            updateSprites();
+            checkCollisions();
+            checkTimer();
+
+        }
+
+        if (gameState == 2) {
+
+            gameOverScreen.tick();
+            backgroundMusic.stop();
+
+        }
+        if (gameState == 3) {
+            //   stopTimers();
+            if (levelsUnlocked == levelNum) {
+                levelsUnlocked++;
+                saveGame();
             }
-            if (sprites.get(i).isVisible()) {
-                ((Background) sprites.get(i)).move();
-            } else {
-                sprites.remove(i);
-            }
-
+            congratsScreen.tick();
+            backgroundMusic.stop();
+            //congratsSound.play();
         }
+
+        if (gameState == 4) {
+            pause.tick();
+        }
+        repaint();
+        /*try {
+            Thread.sleep(5);
+        }
+        catch (Exception f){
+            System.out.println(f);
+        }*/
+
+    }
+
+    private void updateSprites() {
+
+
+        //updates player position and animation frame
+        player.move();
+        player.animationFrame();
+        shooter.animationFrame();
+
+        //updates position of background
+
+
+        if (sprites.get(livesNum + 2).getX() == 0) {
+            sprites.remove(livesNum + 1);
+            sprites.add(livesNum + 2, new Background(windowWidth - ((Background) sprites.get(livesNum + 1)).getSpeed(), new Random().nextInt(5) + 1));
+        }
+        ((Background) sprites.get(livesNum + 1)).move();
+        ((Background) sprites.get(livesNum + 2)).move();
 
 
         //updates position of obstacles and deletes ones that are out of screen
 
-        if (sprites.get(i) instanceof Obstacle) {
-
-            if (sprites.get(i).isVisible()) {
-                ((Obstacle) sprites.get(i)).move();
+        if (sprites.get(livesNum + 4) instanceof Obstacle) {
+            if (sprites.get(livesNum + 4).isVisible()) {
+                ((Obstacle) sprites.get(livesNum + 4)).move();
             } else {
-                sprites.remove(i);
+                sprites.set(livesNum + 4, null);
             }
-
         }
+        if (sprites.get(livesNum + 5) instanceof Obstacle) {
+            if (sprites.get(livesNum + 5).isVisible()) {
+                ((Obstacle) sprites.get(livesNum + 5)).move();
+            } else {
+                sprites.set(livesNum + 5, null);
+            }
+        }
+
 
 
         //updates position of bullets and deletes ones that are out of screen
-        if(sprites.get(i) instanceof Bullet) {
+        if (sprites.get(livesNum + 7) instanceof Bullet) {
 
-            if (sprites.get(i).isVisible()) {
+            if (sprites.get(livesNum + 7).isVisible()) {
 
-                ((Bullet) sprites.get(i)).move();
+                ((Bullet) sprites.get(livesNum + 7)).move();
             } else {
-                sprites.remove(i);
+                sprites.set(livesNum + 7, null);
             }
         }
+
+
     }
 
-}
+    private void checkCollisions() {
 
-private void checkCollisions() {
 
         Rectangle rP = player.getBounds(); //creates hit box for player
 
@@ -359,242 +378,249 @@ private void checkCollisions() {
 
             damageSound.stop();
             gameState = 2;    //game over screen
+            gameOverSound.play();
         }
 
         //checks collision with obstacles
-        boolean bulletCheck = true;
-        for (int i = 0; i < sprites.size(); i++) {
 
-            if (sprites.get(i) instanceof Obstacle) {
-                Rectangle rO = sprites.get(i).getBounds();    //creates hit box for obstacle
+        if (sprites.get(livesNum + 4) instanceof Obstacle) {
+            Rectangle rO = sprites.get(livesNum + 4).getBounds();    //creates hit box for obstacle
 
-                if (rP.intersects(rO)) {   //if player touches obstacle
-                    player.obstacleHit();
-                    sprites.remove(i);
-                    damageSound.play();
-                }
-
-                if (rS.intersects(rO)) {  //if shooter touches obstacle
-                    //later there will be some visual effect added here
-                    sprites.remove(i);
-                }
+            if (rP.intersects(rO)) {   //if player touches obstacle
+                player.obstacleHit();
+                sprites.set(livesNum + 4, null);
+                damageSound.play();
             }
+
+
+            if (rS.intersects(rO)) {  //if shooter touches obstacle
+                //later there will be some visual effect added here
+                sprites.set(livesNum + 4, null);
+            }
+
         }
-        for (int i = 0; i < sprites.size(); i++) {
+        if (sprites.get(livesNum + 5) instanceof Obstacle) {
+            Rectangle rO = sprites.get(livesNum + 5).getBounds();    //creates hit box for obstacle
 
-
-            //checks collision with bullet
-            if (sprites.get(i) instanceof Bullet) {
-
-                Rectangle rB = sprites.get(i).getBounds();  //creates hit box for bullet
-
-                if (rP.intersects(rB)) {  //if player touches bullet
-
-                    for (int j = 0; j < sprites.size(); j++) {
-                        sprites.remove(i);
-                        if (bulletCheck && sprites.get(j) instanceof Heart) {
-                            sprites.remove(j);  //removes one life
-                            damageSound.play();
-                            livesNum--;
-                            bulletCheck = false;
-
-
-                            if (livesNum == 0) {  //checks if player is still alive
-
-                                gameState = 2;    //game over screen
-                                damageSound.stop();
-                            }
-                            break;
-                        }
-                    }
-                }
+            if (rP.intersects(rO)) {   //if player touches obstacle
+                player.obstacleHit();
+                sprites.set(livesNum + 5, null);
+                damageSound.play();
             }
+
+            if (rS.intersects(rO)) {  //if shooter touches obstacle
+                //later there will be some visual effect added here
+                sprites.set(livesNum + 5, null);
+            }
+
         }
 
 
+        //checks collision with bullet
+        if (sprites.get(livesNum + 7) instanceof Bullet) {
 
-}
+            Rectangle rB = sprites.get(livesNum + 7).getBounds();  //creates hit box for bullet
 
-private void checkTimer() {
-        if(levelTime <= 0) {
+            if (rP.intersects(rB)) {  //if player touches bullet
+
+                sprites.set(livesNum + 7, null);
+                sprites.remove(0);  //removes one life
+                damageSound.play();
+                livesNum--;
+
+                if (livesNum == 0) {  //checks if player is still alive
+                    gameState = 2;    //game over screen
+                    damageSound.stop();
+                    gameOverSound.play();
+                }
+
+            }
+        }
+
+
+    }
+
+    private void checkTimer() {
+        if (levelTime <= 0) {
             gameState = 3;
-            congratsSound.play();
+            //congratsSound.play();
             stopTimers();
         }
-}
-
-private void initLives(){   //creates 3 heart objects and adds them to lives list
-
-    for(int i = 0; i<3;i++){
-        sprites.add(new Heart(windowWidth-(55+(i*55)), 0));
     }
-    livesNum = 3;
-}
-    public static boolean getSoundOption(){
+
+    private void initLives() {   //creates 3 heart objects and adds them to lives list
+
+        for (int i = 0; i < 3; i++) {
+            sprites.set(i, new Heart(windowWidth - (55 + (i * 55)), 0));
+        }
+        livesNum = 3;
+    }
+
+    public static boolean getSoundOption() {
         return soundOption;
     }
 
-    public static boolean getMusicOption() { return musicOption;}
+    public static boolean getMusicOption() {
+        return musicOption;
+    }
 
-private void initBackgroundMusic() { // method to load background music
-    URL url;
-    if(musicOption) {
-        url = this.getClass().getResource("/backgroundMusic.wav"); // url to background Music file
-    }
-    else{
-        url = this.getClass().getResource("/soundoff.wav"); // url to background Music file
-    }
+    private void initBackgroundMusic() { // method to load background music
+        URL url;
+        if (musicOption) {
+            url = this.getClass().getResource("/backgroundMusic.wav"); // url to background Music file
+        } else {
+            url = this.getClass().getResource("/soundoff.wav"); // url to background Music file
+        }
         backgroundMusic = Applet.newAudioClip(url); // background music object
-}
-
-private void initSounds(){  //method to load all game sounds
-
-    if(soundOption) {
-
-        URL url = this.getClass().getResource("/damage.wav");   //url to damage sound
-        damageSound = Applet.newAudioClip(url);     //damage sound object
-
-        url = this.getClass().getResource("/danger.wav");
-        dangerSound = Applet.newAudioClip(url);
-
-        url = this.getClass().getResource("/gameover.wav");
-        gameOverSound = Applet.newAudioClip(url);
-
-        url = this.getClass().getResource("/congratsSound.wav");
-        congratsSound = Applet.newAudioClip(url);
     }
-    else{
-        URL url = this.getClass().getResource("/soundoff.wav");
-        damageSound = Applet.newAudioClip(url);     //damage sound object
 
-        dangerSound = Applet.newAudioClip(url);
+    private void initSounds() {  //method to load all game sounds
 
-        gameOverSound = Applet.newAudioClip(url);
+        if (soundOption) {
 
-        congratsSound = Applet.newAudioClip(url);
+            URL url = this.getClass().getResource("/damage.wav");   //url to damage sound
+            damageSound = Applet.newAudioClip(url);     //damage sound object
+
+            url = this.getClass().getResource("/danger.wav");
+            dangerSound = Applet.newAudioClip(url);
+
+            url = this.getClass().getResource("/gameover.wav");
+            gameOverSound = Applet.newAudioClip(url);
+
+            //url = this.getClass().getResource("/congratsSound.wav");
+            //congratsSound = Applet.newAudioClip(url);
+        } else {
+            URL url = this.getClass().getResource("/soundoff.wav");
+            damageSound = Applet.newAudioClip(url);     //damage sound object
+
+            dangerSound = Applet.newAudioClip(url);
+
+            gameOverSound = Applet.newAudioClip(url);
+
+            //congratsSound = Applet.newAudioClip(url);
+        }
     }
-}
 
 
+    private void initTimers() {   //starts all timers except main timer which is started at the first steps
 
-private void initTimers(){   //starts all timers except main timer which is started at the first steps
+        levelTime = 20;  //default time for level, will be multiplied by levelNum
+        levelTime *= levelNum;
 
-    levelTime = 60;  //default time for level, will be multiplied by levelNum
-    levelTime *= levelNum;
+        timersOn = true;
 
-    timersOn =true;
+        shooterRandomTimer = new Random().nextInt(420) + 180;
 
-    shooterRandomTimer = new Random().nextInt(420)+180;
+        spritesRandomTimer = new Random().nextInt(40) + 50;
 
-    spritesRandomTimer = new Random().nextInt(40)+50;
+        levelTimer = 0;
+        obstacleTimer = 0;
+        shooterTimer = 0;
 
-   /* bgSprites = new ArrayList<>();
-    bgSpriteTimer = new Timer(3000, e -> {      //creates timer that will add new background sprite every 3 seconds
-        bgSprites.add(new BgSprite(windowWidth, new Random().nextInt(windowHeight/3)+1));   //adds new BgSprite object to bgSprites list at random y position
-    });
-    bgSpriteTimer.start(); */
 
-    /*obstacleTimer = new Timer(1500, e -> {      //creates timer that adds new obstacles every 1.5 second, will be
-        // changed in the future based on difficulty level
-        sprites.add(new Obstacle(windowWidth, windowHeight, new Random().nextInt(3)+1));
-    });
-    obstacleTimer.start();
+    }
 
-    shooterTimer = new Timer(new Random().nextInt(7000)+3000, e ->{     //timer that makes shooter shoot at random intervals between 3-10 seconds
-       sprites.add(new Danger(0, shooter.getY()-15));    //ads danger icon above the shooter
-       dangerSound.play();      //plays danger sounds
-        Timer tempTimer = new Timer(1000, e1 -> {   //temporary timer that will only run once that creates new bullet and removes danger icon
-           sprites.add(new Bullet(shooter.getWidth(), windowHeight-140));
-           for(int i=0; i<sprites.size();i++){
-               if(sprites.get(i) instanceof Danger){
-                   sprites.remove(i);
-               }
-           }
-        });
-        tempTimer.setRepeats(false);    //runs only once
-        tempTimer.start();
+    private void Timers() {
 
-        int newDelay = new Random().nextInt(7000)+3000;     //new random delay for shooterTimer
-        shooterTimer.setDelay(newDelay);
-        shooterTimer.setInitialDelay(newDelay);
-        shooterTimer.restart();     //those 3 line implement new delay for this timer
-    });
-    shooterTimer.start();
-
-    levelTimer = new Timer(200, e -> {
-       levelTime-=1000;
-    });
-    levelTimer.start();*/
-
-}
-
-private void Timers(){
-
-        if(timersOn){
-            levelTimer+=1;
-            obstacleTimer+=1;
-            shooterTimer+=1;
-            if(obstacleTimer==spritesRandomTimer){
-                sprites.add(new Obstacle(windowWidth, windowHeight, new Random().nextInt(3)+1));
-                obstacleTimer=0;
-                spritesRandomTimer=new Random().nextInt(40)+50;
+        if (timersOn) {
+            levelTimer += 1;
+            obstacleTimer += 1;
+            shooterTimer += 1;
+            if (obstacleTimer == spritesRandomTimer) {
+                if (sprites.get(livesNum + 4) == null)
+                    sprites.set(livesNum + 4, new Obstacle(windowWidth, windowHeight, new Random().nextInt(4) + 1));
+                else
+                    sprites.set(livesNum + 5, new Obstacle(windowWidth, windowHeight, new Random().nextInt(4) + 1));
+                obstacleTimer = 0;
+                spritesRandomTimer = new Random().nextInt(40) + 50;
             }
-            if(shooterTimer==shooterRandomTimer){
-                sprites.add(new Danger(0, shooter.getY()-15));    //ads danger icon above the shooter
+            if (shooterTimer == shooterRandomTimer) {
+                sprites.set(livesNum + 7, new Danger(0, shooter.getY() - 15));    //ads danger icon above the shooter
                 dangerSound.play();      //plays danger sounds
             }
-            if(shooterTimer==shooterRandomTimer+60){
-                sprites.add(new Bullet(shooter.getWidth(), windowHeight-140));
-                for(int i=0; i<sprites.size();i++){
-                    if(sprites.get(i) instanceof Danger){
-                        sprites.remove(i);
-                    }
-                }
-                shooterRandomTimer= new Random().nextInt(420)+180;
-                shooterTimer=0;
+            if (shooterTimer == shooterRandomTimer + 60) {
+                sprites.set(livesNum + 7, new Bullet(shooter.getWidth(), shooter.getY() + 28));
+                shooterRandomTimer = new Random().nextInt(420) + 180;
+                shooterTimer = 0;
             }
-            if(levelTimer==60){
-                levelTime-=1;
-                levelTimer=0;
+            if (levelTimer == 60) {
+                levelTime -= 1;
+                levelTimer = 0;
             }
         }
 
-}
+    }
 
-private void stopTimers(){  //method that stops all timers
+    private void stopTimers() {  //method that stops all timers
 
-    if (gameState != 3)
-        mainTimer.stop();
+        if (gameState != 3)
+            mainTimer.stop();
 
-    timersOn=false;
-}
+        timersOn = false;
+    }
 
-public static int getWindowWidth(){
-    return windowWidth;
-}
+    private void loadSave() {
+        File file = new File("./saveFile.txt");
+        try {
+            Scanner in = new Scanner(file);
+            levelsUnlocked = in.nextInt();
+        } catch (Exception e) {
+            try {
+                PrintWriter writer = new PrintWriter("saveFile.txt", "UTF-8");
+                writer.println("1");
+                writer.close();
+                levelsUnlocked = 1;
 
-public static int getWindowHeight(){
-    return windowHeight;
-}
+            } catch (Exception f) {
+                System.out.println("FILE NOT FOUND");
+            }
+        }
+
+    }
+
+    private void saveGame() {
+        try {
+            PrintWriter writer = new PrintWriter("saveFile.txt", "UTF-8");
+            writer.println(levelsUnlocked);
+            writer.close();
+
+        } catch (Exception e) {
+            System.out.println("FILE NOT FOUND");
+        }
+
+    }
+
+    public static int getWindowWidth() {
+        return windowWidth;
+    }
+
+    public static int getWindowHeight() {
+        return windowHeight;
+    }
+
+    public static int getLevelsUnlocked() {
+        return levelsUnlocked;
+    }
 
 
-
-
-    private class TAdapter extends KeyAdapter{  //checks for key inputs
+    private class TAdapter extends KeyAdapter {  //checks for key inputs
 
         @Override
-        public void keyReleased(KeyEvent e){
+        public void keyReleased(KeyEvent e) {
 
             if (gameState == 0) {
-               if (MenuState == 0) {
-                   menu.keyReleased(e);
-               }
-               if (MenuState == 1) {
-                   options.keyReleased(e);
-               }
-               if(MenuState == 2){
-                   shop.keyRelesed(e);
-               }
+                if (MenuState == 0) {
+                    menu.keyReleased(e);
+                }
+                if (MenuState == 1) {
+                    levels.keyReleased(e);
+                }
+                if (MenuState == 2) {
+                    options.keyReleased(e);
+                }
+                if (MenuState == 3) {
+                    shop.keyRelesed(e);
+                }
 
             }
 
@@ -602,45 +628,53 @@ public static int getWindowHeight(){
                 player.keyReleased(e);
             }
 
+            if (gameState == 2) {
+                gameOverScreen.keyReleased(e);
+            }
+
             if (gameState == 3) {
-                congrats.keyReleased(e);
+                congratsScreen.keyReleased(e);
+            }
+
+            if (gameState == 4) {
+                pause.keyReleased(e);
             }
 
 
         }
 
         @Override
-        public void keyPressed(KeyEvent e){
+        public void keyPressed(KeyEvent e) {
 
             if (gameState == 1) {
                 player.keyPressed(e);
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     gameState = 4;
-                    timersOn=false;
+                    timersOn = false;
                     backgroundMusic.stop();
                 }
             }
 
-            if(gameState == 0) {
+            if (gameState == 0) {
                 if (MenuState == 0) {
                     menu.keyPressed(e);
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
-                        if (menu.currentSelection == 0) { // CLICK ON PLAY
-                            gameState = 1;
-                            backgroundMusic.play();
-                            initTimers(); //////////////// ATTENTION /////////////////
-                            ////////////////////////////// After clicking on play all the other timers need to be start
+                        if (menu.currentSelection == 0) {
+                            MenuState = 1;
+                            levels.currentSelection = 0;
+                            e.setKeyCode(KeyEvent.VK_Z);
                         }
 
+
                         if (menu.currentSelection == 1) { // OPTIONS
-                            MenuState = 1;
-                            options.currentSelection=0;
-                            musicOption =!musicOption;
+                            MenuState = 2;
+                            options.currentSelection = 0;
+                            musicOption = !musicOption;
                         }
 
                         if (menu.currentSelection == 2) {
-                            MenuState = 2;
+                            MenuState = 3;
                             shop.currentSelection = 0;
                         }
 
@@ -650,8 +684,90 @@ public static int getWindowHeight(){
                     }
                 }
                 if (MenuState == 1) {
+                    levels.keyPressed(e);
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        if (levels.currentSelection == 0) {
+                            levelNum = levels.currentSelection + 1;
+                            gameState = 1;
+                            backgroundMusic.play();
+                            initTimers();
+
+                        }
+                        if (levels.currentSelection == 1) {
+
+                            levelNum = levels.currentSelection + 1;
+                            gameState = 1;
+                            backgroundMusic.play();
+                            initTimers();
+
+
+                        }
+                        if (levels.currentSelection == 2) {
+
+                            levelNum = levels.currentSelection + 1;
+                            gameState = 1;
+                            backgroundMusic.play();
+                            initTimers();
+
+
+                        }
+                        if (levels.currentSelection == 3) {
+
+                            levelNum = levels.currentSelection + 1;
+                            gameState = 1;
+                            backgroundMusic.play();
+                            initTimers();
+
+
+                        }
+                        if (levels.currentSelection == 4) {
+
+                            levelNum = levels.currentSelection + 1;
+                            gameState = 1;
+                            backgroundMusic.play();
+                            initTimers();
+
+
+                        }
+                        if (levels.currentSelection == 5) {
+
+                            levelNum = levels.currentSelection + 1;
+                            gameState = 1;
+                            backgroundMusic.play();
+                            initTimers();
+
+
+                        }
+                        if (levels.currentSelection == 6) {
+
+                            levelNum = levels.currentSelection + 1;
+                            gameState = 1;
+                            backgroundMusic.play();
+                            initTimers();
+
+
+                        }
+                        if (levels.currentSelection == 7) {
+
+                            gameState = 1;
+                            backgroundMusic.play();
+                            initTimers();
+                        }
+                        if (levels.currentSelection == 8) {
+                            MenuState = 0;
+                        }
+
+                        if (levels.currentSelection != 8) {
+                            newGame();
+                            closeMenu();
+                        }
+
+
+                    }
+                }
+                if (MenuState == 2) {
                     options.keyPressed(e);
-                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {  //to fix, when you click on options you automatically toggle options button
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
                         if (options.currentSelection == 0) { // turn off background music
 
@@ -662,7 +778,6 @@ public static int getWindowHeight(){
                         if (options.currentSelection == 1) { // turn off sound effects
                             soundOption = !soundOption;
                             initSounds();
-                            player.setPlayerSound();
                         }
 
                         if (options.currentSelection == 2) { // goes back
@@ -670,7 +785,7 @@ public static int getWindowHeight(){
                         }
                     }
                 }
-                if(MenuState==2){
+                if (MenuState == 3) {
                     shop.keyPressed(e);
                     if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         if (shop.currentSelection == 6) {
@@ -681,36 +796,51 @@ public static int getWindowHeight(){
                 }
             }
 
-            if(gameState == 2){
-                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    gameOverSound.stop();
-                    gameState = 1;
-                    levelTime = 60;
-                    backgroundMusic.play();
-                    initGame(); // Besides starting the game again we need to start timers for sprites so we will call initTimers();
-                    initTimers();
-                }
-            }
-            if(gameState == 3) {
-                congrats.keyPressed(e);
+            if (gameState == 2) {
+                gameOverScreen.keyPressed(e);
 
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
-                    if (congrats.currentSelection == 0) { // CLICK ON NextLevel
+                    if (gameOverScreen.currentSelection == 0) {
+                        gameOverSound.stop();
                         gameState = 1;
-                        levelNum++;
-                        initTimers();
-                        player = new Player();
-                        initLives();
                         backgroundMusic.play();
-
-
-                        //////////////// ATTENTION /////////////////
-                        ////////////////////////////// After clicking on play all the other timers need to be start
+                        newGame();
+                        initTimers();
                     }
 
-                    if (congrats.currentSelection == 1) { // CLICK ON Menu
+                    if (gameOverScreen.currentSelection == 1) {
                         gameState = 0;
+                        newMenu();
+                        closeGame();
+                    }
+
+                    if (gameOverScreen.currentSelection == 2) {
+                        System.exit(1);
+                    }
+                }
+            }
+            if (gameState == 3) {
+                congratsScreen.keyPressed(e);
+
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+
+                    if (congratsScreen.currentSelection == 0) { // CLICK ON NextLevel
+                        gameState = 1;
+                        levelNum++;
+                        newGame();
+                        initTimers();
+                        backgroundMusic.play();
+
+                    }
+
+                    if (congratsScreen.currentSelection == 1) { // CLICK ON Menu
+                        gameState = 0;
+                        MenuState = 0;
+                        newMenu();
+                        closeGame();
+                        menu.currentSelection = 0;
+                        e.setKeyCode(KeyEvent.VK_Z);
                     }
                 }
 
@@ -723,9 +853,17 @@ public static int getWindowHeight(){
                     if (pause.currentSelection == 0) {
                         gameState = 1;
                         backgroundMusic.play();
-                        timersOn=true;
+                        timersOn = true;
                     }
                     if (pause.currentSelection == 1) {
+                        gameState = 0;
+                        MenuState = 0;
+                        newMenu();
+                        menu.currentSelection = 0;
+                        closeGame();
+                        e.setKeyCode(KeyEvent.VK_Z);
+                    }
+                    if (pause.currentSelection == 2) {
                         System.exit(1);
                     }
                 }

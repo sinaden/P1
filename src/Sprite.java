@@ -1,5 +1,8 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.net.URL;
 
 public class Sprite {
 
@@ -19,8 +22,14 @@ public class Sprite {
 
     protected void loadImage(String imageName){     //method loading image from resources
 
-        ImageIcon ii = new ImageIcon(this.getClass().getResource(imageName));   //assigns image icon based on given url
-        image = ii.getImage();  //ImageIcon method to assign image icon from ii object to image
+        URL url= this.getClass().getResource(imageName);
+        try {
+            BufferedImage ii = ImageIO.read(url);
+            image = ii;
+        }
+        catch (Exception ignored){
+        }
+
     }
 
     protected void getImageDimensions(){    //method returning width and height of object's sprite

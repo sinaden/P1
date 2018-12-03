@@ -1,8 +1,10 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.applet.Applet;
 import java.applet.AudioClip;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -13,16 +15,17 @@ public class Player extends Sprite {
     private final int floorLevel = 60;
     private int standingOrDucking = 0;  //variable for Array list to determine which sprite to use
     private int animationFrame = 0;     //^
-    private ArrayList<ArrayList<Image>> imageList = new ArrayList<>();  //Array list with all frames of animation for player
-    private ArrayList<Image> standingSprites = new ArrayList<>();   //Array list with all standing sprites
-    private ArrayList<Image> duckingSprites = new ArrayList<>();    //Array list with all ducking sprites
+    private final ArrayList<ArrayList<Image>> imageList = new ArrayList<>();  //Array list with all frames of animation for player
+    private final ArrayList<Image> standingSprites = new ArrayList<>();   //Array list with all standing sprites
+    private final ArrayList<Image> duckingSprites = new ArrayList<>();    //Array list with all ducking sprites
+    private final ArrayList<Image> jumpingSprites = new ArrayList<>();
     private boolean jumpKey;    //check if jump key is pressed
     private boolean jumpAvailable;  //checks if player landed after the last jump
     private URL jumpUrl;
     AudioClip jumpSound;
     private int standingHeight;
     private int duckingHeight;
-    private int gameHeight = Game.getWindowHeight();
+    private final int gameHeight = Game.getWindowHeight();
     boolean standingUP;
 
 
@@ -34,39 +37,73 @@ public class Player extends Sprite {
 
         initPlayer();
 
-        x = (int)(gameHeight/2);
+        x = gameHeight/2;
         y = gameHeight-floorLevel-standingHeight;
 
     }
 
     private void initPlayer(){
 
-        ImageIcon ii;
+        BufferedImage ii;
+        URL url;
+        String urlS;
+
 
         for(int i = 0; i<43; i++){   //loop for standing loading images to list, right now there is only one picture but the loop is ready for the future
 
-            if(i<10)
-                ii = new ImageIcon(this.getClass().getResource("/player/run/run_00"+ i +".png"));
-            else
-                ii = new ImageIcon(this.getClass().getResource("/player/run/run_0"+ i +".png"));
-            standingSprites.add(ii.getImage());
+            try {
+                if (i < 10)
+                    urlS ="/player/run/run_00" + i + ".png";
+                else
+                    urlS ="/player/run/run_0" + i + ".png";
+                url = this.getClass().getResource(urlS);
+                ii = ImageIO.read(url);
+                standingSprites.add(ii);
+
+            }
+            catch (Exception ignored){
+
+            }
         }
         standingHeight = standingSprites.get(0).getHeight(null);
 
 
-        for(int i = 1; i<26; i++){   //loop for loading ducking images to list
+        for(int i = 8; i<20; i++){   //loop for loading ducking images to list
 
-            if(i<10)
-                ii = new ImageIcon(this.getClass().getResource("/player/slide/slide_0"+i+".png"));
-            else
-                ii = new ImageIcon(this.getClass().getResource("/player/slide/slide_"+i+".png"));
-            duckingSprites.add(ii.getImage());
+            try {
+                if (i < 10)
+                    urlS = "/player/slide/slide_0" + i + ".png";
+                else
+                    urlS = "/player/slide/slide_" + i + ".png";
+                url = this.getClass().getResource(urlS);
+                ii = ImageIO.read(url);
+                duckingSprites.add(ii);
+            }
+            catch (Exception ignored){
+
+            }
         }
 
-        duckingHeight = duckingSprites.get(12).getHeight(null);
+            for (int i = 0; i < 37; i++) {
+                try {
+                    if (i < 10)
+                        urlS = "/player/jump/jump_00" + i + ".png";
+                    else
+                        urlS = "/player/jump/jump_0" + i + ".png";
+                    url = this.getClass().getResource(urlS);
+                    ii = ImageIO.read(url);
+                    jumpingSprites.add(ii);
+                }
+                catch (Exception ignored){
+
+            }
+        }
+
+        duckingHeight = duckingSprites.get(4).getHeight(null);
 
         imageList.add(standingSprites);     //adding 2 lists to imageList list
         imageList.add(duckingSprites);
+        imageList.add(jumpingSprites);
         image = imageList.get(standingOrDucking).get(animationFrame); //setting the first frame of standing player to image variable
 
     }
@@ -101,21 +138,42 @@ public class Player extends Sprite {
                 }
                 break;
             case 1:
-                if(animationFrame<14){
+                if(animationFrame<7){
+                    if(animationFrame>=0&&animationFrame<3){
+                        y += (standingHeight-duckingHeight)/3;
+                    }
                     animationFrame++;
                 }
-                else if(animationFrame==14){
-                    animationFrame=10;
+                else if(animationFrame==7){
+                    animationFrame=3;
                 }
-                if(standingUP && animationFrame>=14){
+                if(standingUP){
+                    if(animationFrame<7){
+                        animationFrame=7;
+                    }
+                    if(animationFrame<11)
+                    y -= (standingHeight-duckingHeight)/3;
                     animationFrame++;
-                    if(animationFrame==24){
+                    if(animationFrame==11){
                         standingUP=false;
                         standingOrDucking=0;
                         animationFrame=0;
                     }
                 }
+                break;
+            case 2:
+                if(animationFrame<imageList.get(2).size()-1){
+                    animationFrame++;
 
+                }
+                else{
+                    standingOrDucking=0;
+                    animationFrame=0;
+                }
+                if(y >= gameHeight-floorLevel-standingHeight){
+                    standingOrDucking=0;
+                    animationFrame=0;
+                }
 
                 break;
         }
@@ -136,14 +194,13 @@ public class Player extends Sprite {
         if(y == gameHeight-floorLevel-standingHeight){       //if player touches the ground he can jump again
             jumpAvailable =true;
         }
-        if(y <= gameHeight-floorLevel-(standingHeight*2.4)) {  //if player reaches highest point of jump
+        if(y <= gameHeight-floorLevel-(standingHeight*2)) {  //if player reaches highest point of jump
             jumpAvailable = false;
+
         }
     }
 
-    /**
-     *
-     */
+
     public void obstacleHit(){  //player is moved 40 pixels back if he hits the obstacle
 
         x-=40;
@@ -156,6 +213,8 @@ public class Player extends Sprite {
         if (key == KeyEvent.VK_UP && jumpAvailable && standingOrDucking == 0 && isVisible()){ //up key pressed
             jumpKey = true;
             jumpSound.play();
+            standingOrDucking = 2;
+            animationFrame=0;
         }
 
         if (key == KeyEvent.VK_DOWN){ //down key pressed
@@ -163,7 +222,7 @@ public class Player extends Sprite {
                 standingOrDucking = 1;
                 animationFrame=0;
                 setImage();
-                y += (standingHeight-duckingHeight);
+
             }
         }
 
@@ -174,16 +233,15 @@ public class Player extends Sprite {
 
         int key = e.getKeyCode();
 
-        if (key == KeyEvent.VK_UP && standingOrDucking==0){ //up key released
+        if (key == KeyEvent.VK_UP ){ //up key released
 
             jumpKey = false;
             jumpAvailable = false;
         }
 
         if (key == KeyEvent.VK_DOWN){ //down key released
-            if(jumpAvailable && y == gameHeight-floorLevel-duckingHeight){
+            if(jumpAvailable && standingOrDucking==1){
                 standingUP=true;
-                y -= (standingHeight-duckingHeight);
             }
 
         }

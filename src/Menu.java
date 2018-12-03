@@ -1,5 +1,3 @@
-import com.sun.javafx.iio.ImageLoader;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -10,6 +8,7 @@ import java.io.InputStream;
  * except some small calls in the Game.java,
  * everything related to Menu would happen here.
  */
+@SuppressWarnings("Duplicates")
 public class Menu{
 
 
@@ -30,8 +29,7 @@ public class Menu{
         try {
             String fName = "/DK Cool Crayon.ttf";
             InputStream is = this.getClass().getResourceAsStream(fName);
-            Font font = Font.createFont(Font.TRUETYPE_FONT, is);
-            return font;
+            return Font.createFont(Font.TRUETYPE_FONT, is);
         }
         catch (Exception e){
             return null;
@@ -52,7 +50,7 @@ public class Menu{
 
 
 
-        options[0] = new Button("PLAY", 300 + 0 * 76,
+        options[0] = new Button("PLAY", 300,
                 //new Font("DK Cool Crayon", Font.BOLD, 70), // The text format when it's not selected
                 fontSmall,
                 fontBig,// The text format when it's selected,
@@ -61,7 +59,7 @@ public class Menu{
                 Color.WHITE, Color.WHITE); // The colors don't change but we can change them
         // if it's was to be.
 
-        options[1] = new Button("OPTIONS", 300 + 1 * 76,
+        options[1] = new Button("OPTIONS", 300 + 76,
                 fontSmall,
                 fontBig, Color.WHITE, Color.WHITE);
 

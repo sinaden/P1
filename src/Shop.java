@@ -2,8 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.InputStream;
-import java.net.URL;
 
+@SuppressWarnings("Duplicates")
 public class Shop {
 
     private final ShopButton[] options;
@@ -29,8 +29,7 @@ public class Shop {
         try {
             String fName = "/DK Cool Crayon.ttf";
             InputStream is = this.getClass().getResourceAsStream(fName);
-            Font font = Font.createFont(Font.TRUETYPE_FONT, is);
-            return font;
+            return Font.createFont(Font.TRUETYPE_FONT, is);
         }
         catch (Exception e){
             return null;
@@ -63,7 +62,7 @@ public class Shop {
         ImageIcon icon = new ImageIcon(this.getClass().getResource("/vand2.png"));
         Image SelectedPicture = icon.getImage();
 
-        options[0] = new ShopButton(Picture, SelectedPicture, 350 +  0 * 100 - Picture.getWidth(null) / 2 , 170 + 0 * 180);
+        options[0] = new ShopButton(Picture, SelectedPicture, 350 - Picture.getWidth(null) / 2 , 170);
 
         i2 = new ImageIcon(this.getClass().getResource("/fries1.png"));
         Picture = i2.getImage();
@@ -73,7 +72,7 @@ public class Shop {
         icon = new ImageIcon(this.getClass().getResource("/fries2.png"));
         SelectedPicture = icon.getImage();
 
-        options[1] = new ShopButton(Picture, SelectedPicture, 310 + 2 * 100 - Picture.getWidth(null) / 2, 170 + 0 * 180);
+        options[1] = new ShopButton(Picture, SelectedPicture, 310 + 2 * 100 - Picture.getWidth(null) / 2, 170);
 
         i2 = new ImageIcon(this.getClass().getResource("/skate1.png"));
         Picture = i2.getImage();
@@ -83,7 +82,7 @@ public class Shop {
         icon = new ImageIcon(this.getClass().getResource("/skate2.png"));
         SelectedPicture = icon.getImage();
 
-        options[2] = new ShopButton(Picture, SelectedPicture, 350 + 3 * 100 - Picture.getWidth(null) / 2, 180 + 0 * 180);
+        options[2] = new ShopButton(Picture, SelectedPicture, 350 + 3 * 100 - Picture.getWidth(null) / 2, 180);
 
         i2 = new ImageIcon(this.getClass().getResource("/non1.png"));
         Picture = i2.getImage();
@@ -93,7 +92,7 @@ public class Shop {
         icon = new ImageIcon(this.getClass().getResource("/non2.png"));
         SelectedPicture = icon.getImage();
 
-        options[3] = new ShopButton(Picture, SelectedPicture, 350 + 0 * 100 - Picture.getWidth(null) / 2, 150 + 1 * 180);
+        options[3] = new ShopButton(Picture, SelectedPicture, 350 - Picture.getWidth(null) / 2, 150 + 180);
         i2 = new ImageIcon(this.getClass().getResource("/non1.png"));
         Picture = i2.getImage();
         // 49 * 120
@@ -102,7 +101,7 @@ public class Shop {
         icon = new ImageIcon(this.getClass().getResource("/non2.png"));
         SelectedPicture = icon.getImage();
 
-        options[4] = new ShopButton(Picture, SelectedPicture, 400 + 1 * 100 - Picture.getWidth(null) / 2, 150 + 1 * 180);
+        options[4] = new ShopButton(Picture, SelectedPicture, 400 + 100 - Picture.getWidth(null) / 2, 150 + 180);
 
         i2 = new ImageIcon(this.getClass().getResource("/non1.png"));
         Picture = i2.getImage();
@@ -112,7 +111,7 @@ public class Shop {
         icon = new ImageIcon(this.getClass().getResource("/non2.png"));
         SelectedPicture = icon.getImage();
 
-        options[5] = new ShopButton(Picture, SelectedPicture, 420 + 2 * 100 - Picture.getWidth(null) / 2, 150 + 1 * 180);
+        options[5] = new ShopButton(Picture, SelectedPicture, 420 + 2 * 100 - Picture.getWidth(null) / 2, 150 + 180);
 
     }
 

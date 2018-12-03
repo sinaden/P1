@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.InputStream;
 
+@SuppressWarnings("Duplicates")
 public class Pause extends Menu{
 
     private final Button[] Options2; // options is an array of several Buttons for the main menu
@@ -21,8 +22,7 @@ public class Pause extends Menu{
         try {
             String fName = "/DK Cool Crayon.ttf";
             InputStream is = this.getClass().getResourceAsStream(fName);
-            Font font = Font.createFont(Font.TRUETYPE_FONT, is);
-            return font;
+            return Font.createFont(Font.TRUETYPE_FONT, is);
         }
         catch (Exception e){
             return null;
@@ -42,14 +42,14 @@ public class Pause extends Menu{
         // Options array would be made here, remember that TTF file for the "DK Cool Crayon"
         // Font should be added to JVM fonts folder
 
-        Options2[0] = new Button("Resume", 300 + 0 * 76,
+        Options2[0] = new Button("Resume", 300,
                 fontSmall, // The text format when it's not selected
                 fontBig,// The text format when it's selected,
                 // the only change is the size
                 Color.WHITE, Color.WHITE); // The colors don't change but we can change them
         // if it's was to be.
 
-        Options2[1] = new Button("Exit", 300 + 1 * 76,
+        Options2[1] = new Button("Exit", 300 + 76,
                 fontSmall,
                 fontBig, Color.WHITE, Color.WHITE);
     }

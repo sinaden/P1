@@ -16,10 +16,12 @@ import java.awt.*;
 
 public class Button extends Rectangle { // The class inherits from Rectangle Class because our button is actually a box, filled with text.
 
-    private Font font, selectedFont; // Two fonts. first one is the initiative font (before being selected)
+    private final Font font;
+    private final Font selectedFont; // Two fonts. first one is the initiative font (before being selected)
     // and the second one: "selected font" would be used if we want to use a different font for our selected button.
 
-    private Color color, selectedColor; // // Two colors. first one is the initiative color (before being selected)
+    private final Color color;
+    private final Color selectedColor; // // Two colors. first one is the initiative color (before being selected)
     // and the second one: "selected color" would be used if we want to use a different color for our selected button.
 
     // we may need to implements some changes in graphics, so even though we don't change the font after being selected
@@ -28,10 +30,10 @@ public class Button extends Rectangle { // The class inherits from Rectangle Cla
     private boolean selected; //each button has a boolean "selected" if it's True then
     // the program would compile the button in a different way (for example bigger font or some extra graphics)
 
-    private String text; // The text for the button . it can be "PLAY" or anything that is specified
+    private final String text; // The text for the button . it can be "PLAY" or anything that is specified
     // during initializing the button at the main class
 
-    private int textY; // The vertical position of the button
+    private final int textY; // The vertical position of the button
 
 
     // Constructor

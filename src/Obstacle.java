@@ -13,19 +13,23 @@ public class Obstacle extends Sprite {
 
         switch (i){
             case 1:
-                loadImage("/spikes_1.png");      //gives path to the file with picture to method from Sprite class that will load the image
-                y-=286;
+                loadImage("/table.png");      //gives path to the file with picture to method from Sprite class that will load the image
                 break;
             case 2:
-                loadImage("/spikes_2.png");
-                y-=126;
+                loadImage("/tableBooks.png");
                 break;
             case 3:
-                loadImage("/spikes_2.png");
-                y-=160;
+                loadImage("/books.png");
+                break;
+            case 4:
+                loadImage("/backpack.png");
                 break;
         }
         getImageDimensions();    //method from Sprite class
+        y-=60+height;
+        if(i==1 || i==2){
+            height-=110;
+        }
     }
 
     public void move(){     //changes x position of obstacle

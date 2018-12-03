@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.InputStream;
 
 /*
 
@@ -11,7 +12,7 @@ everything related to Menu would happen here.
  */
 
 @SuppressWarnings("Duplicates")
-public class Congrats extends Menu{
+public class CongratsScreen {
 
     private final Button[] Options; // options is an array of several Buttons for the main menu
     // They would be the "PLAY" "OPTIONS" "SHOP" & "EXIT" buttons.
@@ -25,10 +26,20 @@ public class Congrats extends Menu{
     private boolean stopHere = false; // If it's true, the menu could not be updated
     // (used for not changing the currentselected when user's finger is still on the keyboard.)
 
+    public Font loadFont(){
+        try {
+            String fName = "/DK Cool Crayon.ttf";
+            InputStream is = this.getClass().getResourceAsStream(fName);
+            return Font.createFont(Font.TRUETYPE_FONT, is);
+        }
+        catch (Exception e){
+            return null;
+        }
+    }
 
 
     // Constructor
-    public Congrats() {
+    public CongratsScreen() {
         Options = new Button[2];
 
         Font fontSmall= loadFont();

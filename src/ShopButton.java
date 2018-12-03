@@ -1,14 +1,13 @@
-import javax.swing.*;
 import java.awt.*;
-import java.awt.image.ImageObserver;
 
 public class ShopButton extends Rectangle {
     private boolean selected; //each button has a boolean "selected" if it's True then
     // the program would compile the button in a different way (for example bigger font or some extra graphics)
-    private Image item, selectemItem; // The background Image of the menu
+    private final Image item;
+    private final Image selectemItem; // The background Image of the menu
 
-    private int picX;
-    private int picY;
+    private final int picX;
+    private final int picY;
 
     public ShopButton(Image item, Image selectemItem, int picX, int picY) {
         this.item = item;
