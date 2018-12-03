@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.InputStream;
 
+@SuppressWarnings("Duplicates")
 public class Options extends Menu{
 
     private final Button[] Options2; // options is an array of several Buttons for the main menu
@@ -24,8 +25,7 @@ public class Options extends Menu{
         try {
             String fName = "/DK Cool Crayon.ttf";
             InputStream is = this.getClass().getResourceAsStream(fName);
-            Font font = Font.createFont(Font.TRUETYPE_FONT, is);
-            return font;
+            return Font.createFont(Font.TRUETYPE_FONT, is);
         }
         catch (Exception e){
             return null;
@@ -45,14 +45,14 @@ public class Options extends Menu{
         // Options array would be made here, remember that TTF file for the "DK Cool Crayon"
         // Font should be added to JVM fonts folder
 
-        Options2[0] = new Button("Music",300 + 0 * 76,
+        Options2[0] = new Button("Music", 300,
                 fontSmall, // The text format when it's not selected
                 fontBig,// The text format when it's selected,
                 // the only change is the size
                 Color.WHITE, Color.WHITE); // The colors don't change but we can change them
         // if it's was to be.
 
-        Options2[1] = new Button("Sound effects", 300 + 1 * 76,
+        Options2[1] = new Button("Sound effects", 300 + 76,
                 fontSmall,
                 fontBig, Color.WHITE, Color.WHITE);
 
@@ -119,7 +119,7 @@ public class Options extends Menu{
         menuOne = ii.getImage();  //ImageIcon method to assign image icon from ii object to image
         g2d.drawImage(menuOne, 0, 0, null);
 
-        if (Game.getSoundOption() == true) {
+        if (Game.getSoundOption()) {
             ImageIcon i = new ImageIcon(this.getClass().getResource("/soundon.png"));   //assigns image icon based on given url
             sound = i.getImage();  //ImageIcon method to assign image icon from ii object to image
         //    int width = sound.getWidth(null);
@@ -131,7 +131,7 @@ public class Options extends Menu{
             g2d.drawImage(sound, 970, 0, null);
         }
 
-        if (Game.getMusicOption() == true) {
+        if (Game.getMusicOption()) {
             ImageIcon i = new ImageIcon(this.getClass().getResource("/musicon.png"));   //assigns image icon based on given url
             music = i.getImage();  //ImageIcon method to assign image icon from ii object to image
             g2d.drawImage(music, 922, 0, null);

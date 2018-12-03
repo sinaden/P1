@@ -10,6 +10,7 @@ everything related to Menu would happen here.
 
  */
 
+@SuppressWarnings("Duplicates")
 public class Congrats extends Menu{
 
     private final Button[] Options; // options is an array of several Buttons for the main menu
@@ -38,14 +39,14 @@ public class Congrats extends Menu{
         // Options array would be made here, remember that TTF file for the "DK Cool Crayon"
         // Font should be added to JVM fonts folder
 
-        Options[0] = new Button("Next level",  300 + 0 * 76,
+        Options[0] = new Button("Next level", 300,
                 fontSmall, // The text format when it's not selected
                 fontBig,// The text format when it's selected,
                 // the only change is the size
                 Color.WHITE, Color.WHITE); // The colors don't change but we can change them
         // if it's was to be.
 
-        Options[1] = new Button("Menu",  300 + 1 * 76,
+        Options[1] = new Button("Menu",  300 + 76,
                 fontSmall,
                 fontBig, Color.WHITE, Color.WHITE);
     }

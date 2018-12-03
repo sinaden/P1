@@ -1,4 +1,14 @@
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.net.URL;
+import java.util.ArrayList;
+
 public class Shooter extends Sprite {
+
+    ArrayList<Image>shooterRun;
+    int animationFrame=0;
 
     public Shooter(int x, int y){
 
@@ -9,7 +19,42 @@ public class Shooter extends Sprite {
 
     private void initShooter(){
 
-        loadImage("/shooter.png");  //gives path to the file with picture to method from Sprite class that will load the image
-        getImageDimensions();   //method from Sprite class
+        BufferedImage ii;
+        shooterRun = new ArrayList<>();
+        URL url;
+        String urlS;
+
+        for(int i = 0; i<43; i++) {
+            try {
+                if (i < 10)
+                    urlS = "/shooter/run_0" + i + ".png";
+                else
+                    urlS = "/shooter/run_" + i + ".png";
+                url = this.getClass().getResource(urlS);
+                ii = ImageIO.read(url);
+
+                shooterRun.add(ii);
+            }
+            catch (Exception ignored){
+
+            }
+        }
+        image = shooterRun.get(0);
+        getImageDimensions();
+    }
+
+    public void animationFrame(){
+        if(animationFrame<shooterRun.size()-1){
+            animationFrame++;
+
+        }
+        else{
+            animationFrame=0;
+        }
+        setImage();
+    }
+
+    private void setImage(){
+        image = shooterRun.get(animationFrame);
     }
 }

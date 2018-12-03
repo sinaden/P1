@@ -2,9 +2,9 @@ public class Background extends Sprite {
 
     private final int BACKGROUND_SPEED=8;
 
-    Background(int x, int y, int index){
+    Background(int x, int index){
 
-        super(x, y);
+        super(x, 0);
         initBackground(index);
     }
 
