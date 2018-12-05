@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import Game.Game;
 
 public class Start extends JFrame {
 
